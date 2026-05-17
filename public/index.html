@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>THE LEGEND OF THE FUTURE JAMES'S CREATION · Ultimate Math Predictor v5</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --glass-bg: rgba(10, 10, 30, 0.82);
+      --glass-border: rgba(0, 255, 255, 0.18);
+      --neon-cyan: #00f0ff;
+      --neon-magenta: #ff00c8;
+      --neon-yellow: #ffe600;
+      --neon-green: #00ff88;
+      --neon-orange: #ff6b35;
+      --neon-blue: #007bff;
+      --neon-red: #ff2244;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --card-bg: rgba(15, 15, 42, 0.7);
+      --win-color: #00cfff;
+      --win-border: rgba(0, 207, 255, 0.6);
+      --loss-color: #ff2244;
+      --loss-border: rgba(255, 34, 68, 0.6);
+      --pending-color: #ffe600;
+      --pending-border: rgba(255, 230, 0, 0.6);
+      --half-win-color: #ff8800;
+      --half-win-border: rgba(255, 136, 0, 0.6);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a1a;
+      background-image: radial-gradient(ellipse at 20% 50%, rgba(0, 255, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(255, 0, 200, 0.04) 0%, transparent 50%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 10px;
+      font-family: 'Rajdhani', sans-serif;
+      color: var(--text);
+    }
+    .main-container {
+      max-width: 1400px;
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 1rem;
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .main-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, transparent, rgba(0, 255, 255, 0.015), transparent, rgba(255, 0, 200, 0.01), transparent);
+      animation: rotateGlow 20s linear infinite;
+      z-index: -1;
+    }
+    @keyframes rotateGlow { to { transform: rotate(360deg); } }
+    h1, h2, h3, h4 { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
+    h1 {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      text-align: center;
+      color: var(--neon-cyan);
+      font-size: 0.6rem;
+      letter-spacing: 3px;
+      margin-bottom: 0.3rem;
+    }
+    .section {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(0, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 0.7rem;
+      margin-bottom: 0.6rem;
+    }
+    .input-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin: 0.2rem 0; }
+    .input-group label {
+      display: block;
+      font-size: 0.45rem;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.1rem;
+    }
+    .input-group select, .input-group input, .input-group textarea {
+      padding: 0.35rem 0.6rem;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.7rem;
+    }
+    button {
+      padding: 0.35rem 0.8rem;
+      border: none;
+      border-radius: 40px;
+      font-weight: 600;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      font-size: 0.55rem;
+      background: rgba(0, 0, 0, 0.4);
+      color: white;
+      border: 1px solid rgba(0, 255, 255, 0.25);
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 0 12px rgba(0, 240, 255, 0.3); }
+    .btn-primary { background: linear-gradient(135deg, #0097a7, #00bcd4); border: none; color: #fff; }
+    .btn-success { background: linear-gradient(135deg, #059669, #10b981); border: none; color: #fff; }
+    .btn-warning { background: linear-gradient(135deg, #d97706, #f59e0b); border: none; color: #000; }
+    .btn-danger { background: linear-gradient(135deg, #dc2626, #ef4444); border: none; color: #fff; }
+    .btn-sm { padding: 0.2rem 0.5rem; font-size: 0.5rem; }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0, 255, 255, 0.2);
+      border-top-color: var(--neon-cyan);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .page-menu { display: flex; gap: 0.4rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+    .page-menu-btn {
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      border: 1px solid var(--neon-cyan);
+      background: transparent;
+      color: var(--neon-cyan);
+      font-family: 'Orbitron';
+      font-size: 0.6rem;
+      cursor: pointer;
+    }
+    .page-menu-btn.active { background: rgba(0, 255, 255, 0.15); box-shadow: 0 0 12px rgba(0, 255, 255, 0.2); }
+    .hidden { display: none !important; }
+    .api-status {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      border-radius: 20px;
+      font-size: 0.45rem;
+      font-weight: 600;
+    }
+    .live-indicator {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+      margin-right: 4px;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .logout-btn {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 0, 200, 0.4);
+      color: white;
+      padding: 3px 10px;
+      border-radius: 30px;
+      font-family: 'Orbitron';
+      font-size: 0.45rem;
+      cursor: pointer;
+      z-index: 200;
+    }
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(0, 255, 255, 0.08);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 30px;
+      font-size: 0.5rem;
+    }
+    .teams-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0.4rem 0; }
+    @media(max-width:800px) { .teams-grid { grid-template-columns: 1fr; } }
+    .team-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 0.7rem;
+    }
+    .team-card select { width: 100%; padding: 0.4rem; border-radius: 12px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); color: white; font-size: 0.75rem; }
+    .stat-row { display: flex; gap: 0.3rem; margin: 0.3rem 0; flex-wrap: wrap; }
+    .stat-item {
+      flex: 1;
+      min-width: 55px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 0.2rem;
+    }
+    .stat-item label { font-size: 0.4rem; color: var(--neon-cyan); }
+    .stat-item .val { font-size: 0.7rem; font-weight: 700; font-family: 'Orbitron'; }
+    .elo-display {
+      color: var(--neon-yellow);
+      font-weight: bold;
+      font-family: 'Orbitron';
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+      text-align: center;
+    }
+    .results-grid { display: flex; flex-direction: column; gap: 1.2rem; margin-top: 0.8rem; }
+    .model-card {
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      border-radius: 18px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      padding: 0.9rem;
+      transition: 0.2s;
+    }
+    .model-card.ensemble { border-color: var(--neon-yellow); box-shadow: 0 0 16px rgba(255, 230, 0, 0.1); }
+    .top-scores { display: flex; gap: 0.6rem; margin: 0.6rem 0; flex-wrap: wrap; }
+    .score-badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--neon-magenta);
+      border-radius: 12px;
+      padding: 0.4rem 0.6rem;
+      text-align: center;
+      min-width: 70px;
+    }
+    .score-badge strong { font-size: 1rem; }
+    .score-badge small { font-size: 0.55rem; color: var(--muted); }
+    .outcome-row { display: flex; justify-content: space-around; margin: 0.7rem 0; flex-wrap: wrap; gap: 0.5rem; }
+    .outcome-item { text-align: center; min-width: 70px; }
+    .outcome-item .label { color: var(--muted); font-size: 0.5rem; }
+    .outcome-item .value { font-weight: 800; font-size: 0.9rem; font-family: 'Orbitron'; }
+    .prob-table { width: 100%; font-size: 0.7rem; border-collapse: collapse; }
+    .prob-table td { padding: 0.2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    .prob-bar { height: 4px; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta)); border-radius: 2px; display: inline-block; }
+    .heatmap-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; max-width: 480px; margin: 0.8rem auto; }
+    .heatmap-cell {
+      aspect-ratio: 1;
+      font-size: 0.55rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .heatmap-cell:hover { transform: scale(1.05); border-color: var(--neon-cyan); }
+    .betting-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.4rem; margin-top: 0.3rem; }
+    .betting-card {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 0.3rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .betting-card.highlight { border-color: var(--neon-green); background: rgba(0, 255, 136, 0.05); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .tabs-nav { display: flex; gap: 0.3rem; border-bottom: 1px solid rgba(0, 255, 255, 0.2); padding-bottom: 0.2rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+    .tab-nav-btn {
+      background: transparent;
+      border: none;
+      padding: 0.25rem 0.6rem;
+      font-family: 'Orbitron';
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.55rem;
+    }
+    .tab-nav-btn.active { color: var(--neon-cyan); border-bottom: 2px solid var(--neon-cyan); }
+    .saved-league-item {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      margin: 0.1rem;
+      border-radius: 20px;
+      background: rgba(0, 255, 255, 0.08);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      cursor: pointer;
+      font-size: 0.5rem;
+    }
+    .note { text-align: center; color: #64748b; font-size: 0.5rem; margin-top: 0.8rem; }
+    .market-section-title { font-size: 0.65rem; color: var(--neon-cyan); text-align: center; margin: 0.4rem 0; }
+    .fixture-item {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(0, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 0.8rem;
+      margin-bottom: 0.7rem;
+    }
+    .fixture-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .fixture-date { font-size: 0.5rem; color: var(--muted); margin-top: 0.2rem; }
+    .history-page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem; }
+    .search-bar {
+      flex: 1;
+      min-width: 180px;
+      padding: 0.4rem 0.8rem;
+      border-radius: 40px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 255, 255, 0.25);
+      color: white;
+      font-family: 'Rajdhani';
+      font-size: 0.75rem;
+      outline: none;
+    }
+    .filter-strip { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .filter-btn {
+      padding: 0.2rem 0.55rem;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Rajdhani';
+      font-size: 0.6rem;
+      cursor: pointer;
+    }
+    .filter-btn.active { background: rgba(0, 255, 255, 0.12); color: var(--neon-cyan); border-color: var(--neon-cyan); }
+    .sort-select {
+      padding: 0.25rem 0.5rem;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      color: white;
+      font-family: 'Rajdhani';
+      font-size: 0.6rem;
+    }
+    @keyframes cardReveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes neonPulse { 0%, 100% { box-shadow: 0 0 6px var(--win-border); } 50% { box-shadow: 0 0 18px var(--win-border), 0 0 30px rgba(0, 207, 255, 0.3); } }
+    @keyframes neonPulseRed { 0%, 100% { box-shadow: 0 0 6px var(--loss-border); } 50% { box-shadow: 0 0 18px var(--loss-border), 0 0 30px rgba(255, 34, 68, 0.3); } }
+    @keyframes neonPulseYellow { 0%, 100% { box-shadow: 0 0 6px var(--pending-border); } 50% { box-shadow: 0 0 18px var(--pending-border), 0 0 30px rgba(255, 230, 0, 0.3); } }
+    @keyframes neonPulseOrange { 0%, 100% { box-shadow: 0 0 6px var(--half-win-border); } 50% { box-shadow: 0 0 18px var(--half-win-border), 0 0 30px rgba(255, 136, 0, 0.3); } }
+    .history-card {
+      background: rgba(8, 8, 24, 0.85);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      border: 1px solid rgba(0, 255, 255, 0.15);
+      padding: 0.9rem;
+      margin-bottom: 0.8rem;
+      animation: cardReveal 0.4s ease both;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .history-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent); opacity: 0.5; }
+    .history-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1); }
+    .history-card.win-card { border-color: var(--win-border); animation: cardReveal 0.4s ease both, neonPulse 3s infinite; }
+    .history-card.loss-card { border-color: var(--loss-border); animation: cardReveal 0.4s ease both, neonPulseRed 3s infinite; }
+    .history-card.pending-card { border-color: var(--pending-border); animation: cardReveal 0.4s ease both, neonPulseYellow 3s infinite; }
+    .history-card.half-win-card { border-color: var(--half-win-border); animation: cardReveal 0.4s ease both, neonPulseOrange 3s infinite; }
+    .hcard-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.4rem; }
+    .hcard-league { font-size: 0.5rem; color: var(--neon-cyan); letter-spacing: 2px; text-transform: uppercase; font-family: 'Orbitron'; }
+    .hcard-datetime { font-size: 0.45rem; color: var(--muted); }
+    .hcard-teams { display: flex; align-items: center; justify-content: space-between; margin: 0.6rem 0; gap: 0.5rem; }
+    .hcard-team { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; flex: 1; }
+    .hcard-team-logo { width: 36px; height: 36px; border-radius: 50%; background: rgba(0, 255, 255, 0.08); border: 1px solid rgba(0, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; overflow: hidden; }
+    .hcard-team-name { font-size: 0.6rem; font-weight: 700; text-align: center; font-family: 'Orbitron'; max-width: 80px; }
+    .hcard-score-vs { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+    .hcard-vs { font-size: 0.5rem; color: var(--muted); }
+    .hcard-ft-score { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 900; color: white; text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+    .hcard-ft-score.win-score { color: var(--win-color); text-shadow: 0 0 10px rgba(0, 207, 255, 0.5); }
+    .hcard-ft-score.loss-score { color: var(--loss-color); text-shadow: 0 0 10px rgba(255, 34, 68, 0.5); }
+    .hcard-ft-score.half-win-score { color: var(--half-win-color); text-shadow: 0 0 10px rgba(255, 136, 0, 0.5); }
+    .status-badge { display: inline-flex; align-items: center; gap: 3px; padding: 0.15rem 0.5rem; border-radius: 20px; font-family: 'Orbitron'; font-size: 0.45rem; font-weight: 700; }
+    .badge-win { background: rgba(0, 207, 255, 0.12); color: var(--win-color); border: 1px solid var(--win-border); }
+    .badge-loss { background: rgba(255, 34, 68, 0.12); color: var(--loss-color); border: 1px solid var(--loss-border); }
+    .badge-pending { background: rgba(255, 230, 0, 0.12); color: var(--pending-color); border: 1px solid var(--pending-border); }
+    .badge-half-win { background: rgba(255, 136, 0, 0.12); color: var(--half-win-color); border: 1px solid var(--half-win-border); }
+    .market-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.35rem; margin: 0.5rem 0; }
+    .mkt-box {
+      border-radius: 10px;
+      padding: 0.3rem 0.4rem;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+    }
+    .mkt-box.mkt-win { border-color: var(--win-border); background: rgba(0, 207, 255, 0.06); animation: neonPulse 2.5s infinite; }
+    .mkt-box.mkt-win .mkt-label { color: var(--win-color); }
+    .mkt-box.mkt-win .mkt-badge { background: var(--win-color); color: #000; }
+    .mkt-box.mkt-loss { border-color: var(--loss-border); background: rgba(255, 34, 68, 0.06); animation: neonPulseRed 2.5s infinite; }
+    .mkt-box.mkt-loss .mkt-label { color: var(--loss-color); }
+    .mkt-box.mkt-loss .mkt-badge { background: var(--loss-color); color: #fff; }
+    .mkt-box.mkt-pending { border-color: var(--pending-border); }
+    .mkt-box.mkt-pending .mkt-label { color: var(--pending-color); }
+    .mkt-box.mkt-half-win { border-color: var(--half-win-border); background: rgba(255, 136, 0, 0.06); animation: neonPulseOrange 2.5s infinite; }
+    .mkt-box.mkt-half-win .mkt-label { color: var(--half-win-color); }
+    .mkt-box.mkt-half-win .mkt-badge { background: var(--half-win-color); color: #000; }
+    .mkt-label { font-size: 0.48rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .mkt-prob { font-size: 0.55rem; font-family: 'Orbitron'; font-weight: 700; margin: 0.1rem 0; }
+    .mkt-badge { font-size: 0.38rem; padding: 0.08rem 0.3rem; border-radius: 20px; font-family: 'Orbitron'; font-weight: 900; display: inline-block; color: white; }
+    .cs-grid { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.4rem 0; }
+    .cs-box {
+      border-radius: 10px;
+      padding: 0.3rem 0.5rem;
+      text-align: center;
+      min-width: 55px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .cs-box.cs-hit { border-color: var(--win-border); background: rgba(0, 207, 255, 0.1); animation: neonPulse 2s infinite; }
+    .cs-box.cs-hit .cs-score { color: var(--win-color); }
+    .cs-box.cs-miss { border-color: var(--loss-border); background: rgba(255, 34, 68, 0.05); }
+    .cs-box.cs-miss .cs-score { color: var(--loss-color); }
+    .cs-score { font-family: 'Orbitron'; font-size: 0.8rem; font-weight: 900; }
+    .cs-pct { font-size: 0.4rem; color: var(--muted); }
+    .cs-result-badge { font-size: 0.38rem; padding: 0.06rem 0.25rem; border-radius: 20px; font-family: 'Orbitron'; font-weight: 900; margin-top: 0.1rem; display: inline-block; }
+    .ft-logger { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(0, 255, 255, 0.1); }
+    .ft-input { width: 45px; padding: 0.25rem; border-radius: 8px; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(0, 255, 255, 0.3); color: white; font-family: 'Orbitron'; font-size: 0.7rem; text-align: center; }
+    .hcard-notes { margin-top: 0.4rem; }
+    .notes-input { width: 100%; padding: 0.3rem 0.5rem; border-radius: 8px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--muted); font-size: 0.6rem; resize: none; font-family: 'Rajdhani'; }
+    .hcard-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.4rem; color: var(--muted); margin-top: 0.4rem; flex-wrap: wrap; gap: 0.2rem; }
+    .expand-btn { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 0.6rem; padding: 0.1rem 0.3rem; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .expand-btn:hover { color: var(--neon-cyan); border-color: var(--neon-cyan); }
+    .hcard-details { overflow: hidden; transition: max-height 0.4s ease; max-height: 0; }
+    .hcard-details.expanded { max-height: 800px; }
+    .analytics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.6rem; margin-bottom: 0.8rem; }
+    .analytics-card {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 16px;
+      border: 1px solid rgba(0, 255, 255, 0.15);
+      padding: 0.7rem;
+      text-align: center;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .analytics-card:hover { transform: translateY(-2px); box-shadow: 0 0 16px rgba(0, 255, 255, 0.1); }
+    .analytics-card::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent); }
+    .ac-icon { font-size: 1.2rem; margin-bottom: 0.2rem; }
+    .ac-value { font-family: 'Orbitron'; font-size: 1.1rem; font-weight: 900; color: var(--neon-cyan); }
+    .ac-value.win-val { color: var(--win-color); }
+    .ac-value.loss-val { color: var(--loss-color); }
+    .ac-value.half-val { color: var(--half-win-color); }
+    .ac-label { font-size: 0.42rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.1rem; }
+    .streak-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.6rem; margin-bottom: 0.8rem; }
+    .streak-card {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 16px;
+      padding: 0.7rem;
+      text-align: center;
+      border: 1px solid rgba(255, 230, 0, 0.2);
+      animation: neonPulseYellow 4s infinite;
+    }
+    .streak-card.win-streak { border-color: var(--win-border); animation: neonPulse 4s infinite; }
+    .streak-card.loss-streak { border-color: var(--loss-border); animation: neonPulseRed 4s infinite; }
+    .streak-card.half-streak { border-color: var(--half-win-border); animation: neonPulseOrange 4s infinite; }
+    .streak-val { font-family: 'Orbitron'; font-size: 1.5rem; font-weight: 900; color: var(--neon-yellow); }
+    .streak-card.win-streak .streak-val { color: var(--win-color); }
+    .streak-card.loss-streak .streak-val { color: var(--loss-color); }
+    .streak-card.half-streak .streak-val { color: var(--half-win-color); }
+    .streak-label { font-size: 0.45rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .progress-circle-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+    .progress-circle { width: 70px; height: 70px; position: relative; }
+    .progress-circle svg { transform: rotate(-90deg); width: 70px; height: 70px; }
+    .progress-circle .track { fill: none; stroke: rgba(255, 255, 255, 0.05); stroke-width: 6; }
+    .progress-circle .fill { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+    .progress-circle-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Orbitron'; font-size: 0.65rem; font-weight: 900; }
+    .chart-wrapper { background: rgba(0, 0, 0, 0.3); border-radius: 14px; padding: 0.6rem; margin-bottom: 0.5rem; border: 1px solid rgba(0, 255, 255, 0.08); }
+    .data-mgmt-row { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; margin: 0.5rem 0; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-box {
+      background: rgba(10, 10, 30, 0.95);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 1.5rem;
+      max-width: 320px;
+      width: 90%;
+      text-align: center;
+      animation: cardReveal 0.3s ease;
+    }
+    .modal-box h3 { font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--neon-red); }
+    .modal-box p { font-size: 0.65rem; color: var(--muted); margin-bottom: 1rem; }
+    .modal-btns { display: flex; gap: 0.5rem; justify-content: center; }
+    .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; }
+    .particle { position: absolute; width: 2px; height: 2px; background: rgba(0, 255, 255, 0.4); border-radius: 50%; animation: float linear infinite; }
+    @keyframes float { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-10vh) scale(1); opacity: 0; } }
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 0.4rem; }
+    .toast { background: rgba(0, 0, 0, 0.85); border: 1px solid var(--neon-cyan); border-radius: 12px; padding: 0.5rem 1rem; font-size: 0.6rem; color: white; animation: cardReveal 0.3s ease; font-family: 'Rajdhani'; }
+    .toast.toast-success { border-color: var(--neon-green); color: var(--neon-green); }
+    .toast.toast-error { border-color: var(--neon-red); color: var(--neon-red); }
+    .api-source-selector { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+    .api-source-btn {
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Rajdhani';
+      font-size: 0.6rem;
+      cursor: pointer;
+    }
+    .api-source-btn.active { background: rgba(0, 255, 255, 0.12); color: var(--neon-cyan); border-color: var(--neon-cyan); }
+    .saved-leagues-section { margin: 0.3rem 0; }
+    .empty-history { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.7rem; }
+    .empty-history .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+    .save-hist-btn {
+      font-size: 0.48rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(0, 207, 255, 0.2), rgba(255, 0, 200, 0.1));
+      border: 1px solid rgba(0, 207, 255, 0.4);
+      color: var(--win-color);
+      cursor: pointer;
+      font-family: 'Orbitron';
+    }
+    .db-status {
+      display: inline-block;
+      padding: 0.15rem 0.4rem;
+      border-radius: 20px;
+      font-size: 0.45rem;
+      font-weight: 600;
+    }
+    .db-ready { background: rgba(0, 255, 136, 0.1); color: var(--neon-green); border: 1px solid var(--neon-green); }
+    .db-not-ready { background: rgba(255, 68, 68, 0.1); color: #ff6666; border: 1px solid #ff4444; }
+    .asian-line-selector { display: flex; gap: 0.3rem; align-items: center; margin: 0.3rem 0; flex-wrap: wrap; }
+    .asian-line-btn {
+      padding: 0.15rem 0.4rem;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.5rem;
+      cursor: pointer;
+    }
+    .asian-line-btn.active { background: rgba(0, 255, 255, 0.12); color: var(--neon-cyan); border-color: var(--neon-cyan); }
+    @media(max-width:600px) {
+      .analytics-grid { grid-template-columns: repeat(2, 1fr); }
+      .streak-grid { grid-template-columns: repeat(2, 1fr); }
+      .market-results-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particlesContainer"></div>
+  <div class="toast-container" id="toastContainer"></div>
+  <div class="modal-overlay hidden" id="confirmModal">
+    <div class="modal-box">
+      <h3 id="confirmTitle">⚠️ Confirm</h3>
+      <p id="confirmMsg">Are you sure?</p>
+      <div class="modal-btns">
+        <button class="btn-danger" id="confirmYes">Yes, Delete</button>
+        <button onclick="closeConfirmModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div id="authWrapper" style="min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;background:#0a0a1a;position:fixed;inset:0;z-index:9000">
+    <div style="width:100%;max-width:360px;background:rgba(10,10,30,0.85);backdrop-filter:blur(25px);border:1px solid rgba(0,255,255,0.2);border-radius:24px;padding:1.5rem;">
+      <div style="text-align:center;margin-bottom:1rem;">
+        <h1 style="font-size:1rem;">🧠 NEURAL PREDICTOR</h1>
+        <p style="color:#94a3b8;font-size:0.5rem;">The Legend of the Future James's Creation</p>
+      </div>
+      <div style="display:flex;gap:0;margin-bottom:1rem;border-radius:40px;background:rgba(0,0,0,0.4);padding:2px;">
+        <button class="auth-tab active" data-atab="login" style="flex:1;padding:0.45rem;border-radius:40px;font-family:'Orbitron';font-size:0.55rem;background:linear-gradient(135deg,rgba(0,255,255,0.2),rgba(255,0,200,0.1));color:white;">🔐 LOGIN</button>
+        <button class="auth-tab" data-atab="register" style="flex:1;padding:0.45rem;border-radius:40px;font-family:'Orbitron';font-size:0.55rem;background:transparent;color:#94a3b8;">📝 REGISTER</button>
+      </div>
+      <div id="loginForm">
+        <div style="margin-bottom:0.7rem;"><label style="font-size:0.45rem;color:#00f0ff;">Username</label><input type="text" id="loginUsername" value="demoUser" style="width:100%;padding:0.5rem;border-radius:12px;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,255,0.2);color:white;"></div>
+        <div style="margin-bottom:0.7rem;"><label style="font-size:0.45rem;color:#00f0ff;">Password</label><input type="password" id="loginPassword" value="demo123" style="width:100%;padding:0.5rem;border-radius:12px;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,255,0.2);color:white;"></div>
+        <button id="loginBtn" style="width:100%;padding:0.6rem;border-radius:40px;background:linear-gradient(135deg,#0097a7,#00bcd4);color:white;font-weight:bold;">⚡ ACCESS PREDICTOR</button>
+        <div id="loginMessage" style="margin-top:0.3rem;font-size:0.5rem;text-align:center;"></div>
+      </div>
+      <div id="registerForm" style="display:none;">
+        <div style="margin-bottom:0.6rem;"><label style="font-size:0.45rem;">Username</label><input type="text" id="regUsername" style="width:100%;padding:0.5rem;border-radius:12px;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,255,0.2);color:white;"></div>
+        <div style="margin-bottom:0.6rem;"><label style="font-size:0.45rem;">Password</label><input type="password" id="regPassword" style="width:100%;padding:0.5rem;border-radius:12px;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,255,0.2);color:white;"></div>
+        <div style="margin-bottom:0.6rem;"><label style="font-size:0.45rem;">Confirm</label><input type="password" id="regConfirmPassword" style="width:100%;padding:0.5rem;border-radius:12px;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,255,0.2);color:white;"></div>
+        <button id="registerBtn" style="width:100%;padding:0.6rem;border-radius:40px;background:linear-gradient(135deg,#0097a7,#00bcd4);color:white;">✨ CREATE ACCOUNT</button>
+        <div id="registerMessage" style="margin-top:0.3rem;font-size:0.5rem;text-align:center;"></div>
+      </div>
+    </div>
+  </div>
+  <div id="predictorApp" class="hidden" style="width:100%">
+    <button id="appLogoutBtn" class="logout-btn">⤀ LOGOUT</button>
+    <div class="main-container">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+        <div><h1>🧠 THE LEGEND OF THE FUTURE JAMES'S CREATION</h1><p class="subtitle"><span class="live-indicator"></span> Enhanced Math · Elo · Poisson · MC · Neural · Full Markets + AH + DC · Heatmap · History · Analytics</p></div>
+        <div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;"><span class="user-badge">👤 <span id="currentUserDisplay"></span></span><span id="apiStatus" class="api-status">⚡ Ready</span><span id="dbStatusIndicator" class="db-status db-ready">💾 LocalStorage Active</span></div>
+      </div>
+      <div class="page-menu">
+        <button class="page-menu-btn active" data-page="auto">📡 AUTO PREDICT</button>
+        <button class="page-menu-btn" data-page="manual">🔧 MANUAL PREDICT</button>
+        <button class="page-menu-btn" data-page="history">📋 HISTORY</button>
+        <button class="page-menu-btn" data-page="analytics">📊 ANALYTICS</button>
+      </div>
+      <div id="autoPage" class="page-content">
+        <div class="section">
+          <div class="input-row">
+            <div class="api-source-selector"><button class="api-source-btn active" data-asrc="football-data">Football-Data</button><button class="api-source-btn" data-asrc="api-football">API-Football</button></div>
+            <div class="input-group"><label>🏆 LEAGUE</label><select id="autoCompSelect"><option value="">-- Select --</option><option value="PL">🏴 Premier League</option><option value="PD">🇪🇸 La Liga</option><option value="BL1">🇩🇪 Bundesliga</option><option value="SA">🇮🇹 Serie A</option><option value="FL1">🇫🇷 Ligue 1</option><option value="DED">🇳🇱 Eredivisie</option><option value="CL">🏆 Champions League</option></select></div>
+            <button class="btn-primary" onclick="fetchAutoLeagueData()">📡 FETCH (Standings + Fixtures)</button>
+            <button class="btn-success btn-sm" onclick="autoPredictAll()">🎯 PREDICT ALL</button>
+          </div>
+          <div id="autoStatus" style="font-size:0.45rem; margin-top:0.2rem;"></div>
+        </div>
+        <div id="fixtureList" style="display:flex;flex-direction:column;gap:0.6rem;"></div>
+      </div>
+      <div id="manualPage" class="page-content hidden">
+        <div class="section">
+          <div class="api-source-selector"><button class="api-source-btn active" data-msrc="football-data">Football-Data</button><button class="api-source-btn" data-msrc="api-football">API-Football</button><button class="api-source-btn" data-msrc="manual">📝 Manual</button></div>
+          <div class="input-row"><div class="input-group"><label>🏆 COMP</label><select id="manualCompSelect"><option value="">-- Select --</option><option value="PL">🏴 PL</option><option value="PD">🇪🇸 LL</option><option value="BL1">🇩🇪 BL</option><option value="SA">🇮🇹 SA</option><option value="FL1">🇫🇷 L1</option><option value="DED">🇳🇱 ED</option><option value="CL">🏆 CL</option></select></div><button class="btn-primary btn-sm" onclick="fetchManualStandings()">📡 FETCH</button><button class="btn-sm" onclick="fetchRecentMatches()">📜 FORM</button></div>
+          <div id="savedLeaguesSection" class="saved-leagues-section hidden"></div>
+          <div id="manualInputSection" class="hidden"><textarea id="manualTableInput" rows="3" placeholder="| Pos | Team | P | W | D | L | GLS | PTS |"></textarea><div class="input-row"><input type="text" id="manualLeagueName" placeholder="League name" style="flex:1"><button class="btn-warning btn-sm" onclick="parseManualTable()">📋 PARSE</button><button class="btn-success btn-sm" onclick="saveManualLeague()">💾 SAVE</button></div><div id="manualParseMsg"></div></div>
+          <div id="standingsPreview" style="font-size:0.45rem;margin-top:0.2rem;"></div>
+        </div>
+        <div class="section"><div class="input-row"><div class="input-group"><label>⚽ AVG G/M</label><input id="computedAvg" readonly value="2.75" style="width:55px;"></div><div class="input-group"><label>🏠 HA</label><input type="number" id="homeAdvInput" step="0.05" value="1.18" style="width:55px;"></div><div class="input-group"><label>🌤️</label><select id="weatherSelect"><option value="clear">☀️</option><option value="light_rain">🌧️</option></select></div><button class="btn-sm" onclick="autoCalibrate()">🔧 AUTO</button></div></div>
+        <div class="teams-grid"><div class="team-card"><h3>🏠 HOME</h3><select id="homeSelect" onchange="updateManualTeam('home')"></select><div id="homeStats"></div><div id="homeElo" class="elo-display"></div></div><div class="team-card"><h3>✈️ AWAY</h3><select id="awaySelect" onchange="updateManualTeam('away')"></select><div id="awayStats"></div><div id="awayElo" class="elo-display"></div></div></div>
+        <div style="text-align:center;gap:0.3rem;display:flex;flex-wrap:wrap;justify-content:center;margin-bottom:0.5rem">
+          <button class="btn-primary" onclick="calculateAll()">📊 PREDICT (Poisson+MC+NN)</button>
+          <button class="btn-success btn-sm" onclick="trainAndPredictTF()">🧠 NN TRAIN & PREDICT</button>
+          <button class="save-hist-btn" onclick="saveCurrentToHistory()">💾 SAVE TO HISTORY</button>
+        </div>
+        <div class="tabs-nav"><button class="tab-nav-btn active" data-mtab="predictions">📊 PREDICTIONS</button><button class="tab-nav-btn" data-mtab="betting">💰 MARKETS</button><button class="tab-nav-btn" data-mtab="heatmap">🔥 HEATMAP</button><button class="tab-nav-btn" data-mtab="calibration">🎯 LEARN</button></div>
+        <div id="predictionsTab" class="tab-content active"><div class="results-grid" id="resultsContainer"><p style="color:var(--muted);text-align:center;">Select teams and PREDICT</p></div><div id="valueBetsContainer"></div></div>
+        <div id="bettingTab" class="tab-content"><div class="section"><div class="betting-grid" id="bettingMarkets"></div></div></div>
+        <div id="heatmapTab" class="tab-content"><div class="section"><div class="heatmap-grid" id="heatmapGrid"></div></div></div>
+        <div id="calibrationTab" class="tab-content"><div><div class="input-row" style="justify-content:center;"><input type="number" id="actualHomeGoals" placeholder="0" style="width:50px;"><input type="number" id="actualAwayGoals" placeholder="0" style="width:50px;"><button class="btn-sm" onclick="logManualResult()">📝 LOG RESULT</button><button class="btn-success btn-sm" onclick="selfLearn()">🧠 ANALYZE</button></div><div id="calibrationStats"></div><div id="learningInsights"></div></div></div>
+      </div>
+      <div id="historyPage" class="page-content hidden">
+        <div class="section">
+          <div class="history-page-header">
+            <input type="text" class="search-bar" id="historySearch" placeholder="🔍 Search team, league, score..." oninput="renderHistoryCards()">
+            <select class="sort-select" id="historySort" onchange="renderHistoryCards()">
+              <option value="newest">Latest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="wins">Wins First</option>
+              <option value="losses">Losses First</option>
+            </select>
+          </div>
+          <div class="filter-strip" id="historyFilters">
+            <button class="filter-btn active" data-hf="all" onclick="setHistoryFilter('all')">All</button>
+            <button class="filter-btn" data-hf="today" onclick="setHistoryFilter('today')">Today</button>
+            <button class="filter-btn" data-hf="week" onclick="setHistoryFilter('week')">This Week</button>
+            <button class="filter-btn" data-hf="month" onclick="setHistoryFilter('month')">This Month</button>
+            <button class="filter-btn" data-hf="year" onclick="setHistoryFilter('year')">This Year</button>
+            <button class="filter-btn" data-hf="wins" onclick="setHistoryFilter('wins')">✅ Wins Only</button>
+            <button class="filter-btn" data-hf="losses" onclick="setHistoryFilter('losses')">❌ Losses Only</button>
+            <button class="filter-btn" data-hf="pending" onclick="setHistoryFilter('pending')">⏳ Pending</button>
+            <button class="filter-btn" data-hf="cshits" onclick="setHistoryFilter('cshits')">🎯 CS Hits</button>
+            <button class="filter-btn" data-hf="doublechance" onclick="setHistoryFilter('doublechance')">🎲 Double Chance</button>
+            <button class="filter-btn" data-hf="asian" onclick="setHistoryFilter('asian')">🌏 Asian Handicap</button>
+          </div>
+          <div class="data-mgmt-row">
+            <button class="btn-success btn-sm" onclick="exportHistory()">⬇️ EXPORT JSON</button>
+            <button class="btn-primary btn-sm" onclick="document.getElementById('importFileInput').click()">⬆️ IMPORT JSON</button>
+            <button class="btn-warning btn-sm" onclick="backupHistory()">💾 BACKUP</button>
+            <button class="btn-danger btn-sm" onclick="confirmClearHistory()">🗑️ CLEAR ALL</button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importHistory(event)">
+          </div>
+          <div id="historyCount" style="font-size:0.5rem;color:var(--muted);text-align:center;margin-top:0.3rem"></div>
+        </div>
+        <div id="historyCardsList"></div>
+      </div>
+      <div id="analyticsPage" class="page-content hidden">
+        <div class="section">
+          <h3 style="font-size:0.75rem;color:var(--neon-cyan);margin-bottom:0.5rem;">📊 OVERVIEW</h3>
+          <div class="analytics-grid" id="analyticsOverviewGrid"></div>
+        </div>
+        <div class="section">
+          <h3 style="font-size:0.75rem;color:var(--neon-cyan);margin-bottom:0.5rem;">🎯 ACCURACY RATES</h3>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;" id="progressCirclesRow"></div>
+        </div>
+        <div class="section">
+          <h3 style="font-size:0.75rem;color:var(--neon-yellow);margin-bottom:0.5rem;">🔥 STREAKS</h3>
+          <div class="streak-grid" id="streakGrid"></div>
+        </div>
+        <div class="section">
+          <h3 style="font-size:0.75rem;color:var(--neon-magenta);margin-bottom:0.5rem;">📈 PERFORMANCE CHARTS</h3>
+          <div class="chart-wrapper" style="height:200px"><canvas id="winLossChart"></canvas></div>
+          <div class="chart-wrapper" style="height:200px"><canvas id="marketAccChart"></canvas></div>
+        </div>
+        <div class="section">
+          <h3 style="font-size:0.75rem;color:var(--neon-cyan);margin-bottom:0.5rem;">💰 MARKET ACCURACY</h3>
+          <div id="marketAccTable" style="font-size:0.6rem;"></div>
+        </div>
+      </div>
+      <div class="note">🧠 Enhanced v5: Elo · Dixon‑Coles Poisson · Monte Carlo (18k) · Neural Net · Asian Handicap · Double Chance · History Cards · Analytics · Streaks · LocalStorage Storage · Self‑learning</div>
+    </div>
+  </div>
+  <script>
+    // ==================== CORE CONSTANTS ====================
+    const USK='jnp11_users',SSK='jnp11_session',MMK='jnp11_mem',CCK='jnp11_cal',WWK='jnp11_wts',LLK='jnp11_leagues';
+    const HISTORY_STORAGE_KEY = 'jnp11_match_history';
+    let curUser=null, allTeams=[], selHome=null, selAway=null, lastPred=null, lastXG=null, realForm={};
+    let tfModel=null, tfTrained=false;
+    let calData=[], predMem=[];
+    let lw={homeAdv:1.18,drawCorr:0.08,formW:0.5};
+    let currentAsianLine = 0.25;
+    let autoSrc='football-data',manSrc='football-data';
+    let upcomingFix=[];
+    let currentHistoryFilter='all';
+    let currentLeagueName='';
+    let winLossChartInst=null, marketAccChartInst=null;
+    function $(id){return document.getElementById(id);}
+    
+    const getApiUrl = (source, endpoint, params) => {
+      if (source === 'football-data') {
+        let url = `/api/football-data?endpoint=${endpoint}`;
+        if (params.competitionId) url += `&competitionId=${params.competitionId}`;
+        if (params.teamId) url += `&teamId=${params.teamId}`;
+        return url;
+      } else {
+        let url = `/api/api-football?endpoint=${endpoint}`;
+        if (params.leagueId) url += `&leagueId=${params.leagueId}`;
+        if (params.teamId) url += `&teamId=${params.teamId}`;
+        if (params.season) url += `&season=${params.season}`;
+        return url;
+      }
+    };
+    
+    function calculateAsianHandicap(homeProb, drawProb, awayProb, line = 0.25) {
+      let homeCoverProb = 0, awayCoverProb = 0;
+      if (line === 0) { homeCoverProb = homeProb + drawProb * 0.5; awayCoverProb = awayProb + drawProb * 0.5; }
+      else if (line === 0.25) { homeCoverProb = (homeProb + drawProb * 0.5) * 0.5 + homeProb * 0.5; awayCoverProb = (awayProb + drawProb * 0.5) * 0.5 + (awayProb + drawProb) * 0.5; }
+      else if (line === 0.5) { homeCoverProb = homeProb; awayCoverProb = awayProb + drawProb; }
+      else if (line === 0.75) { homeCoverProb = homeProb * 0.5 + (homeProb - 0) * 0.5; awayCoverProb = (awayProb + drawProb) * 0.5 + (awayProb + drawProb + 0) * 0.5; }
+      else if (line === 1) { homeCoverProb = homeProb; awayCoverProb = awayProb + drawProb; }
+      else if (line === 1.25) { homeCoverProb = (homeProb - 0) * 0.5 + (homeProb - 0) * 0.5; awayCoverProb = (awayProb + drawProb) * 0.5 + (awayProb + drawProb + 0) * 0.5; }
+      else if (line === 1.5) { homeCoverProb = Math.max(0, homeProb - 0); awayCoverProb = Math.min(1, awayProb + drawProb + 0); }
+      else { homeCoverProb = homeProb; awayCoverProb = awayProb + drawProb; }
+      return { homeCover: Math.min(1, Math.max(0, homeCoverProb)), awayCover: Math.min(1, Math.max(0, awayCoverProb)), line: line, homeOdds: 1 / Math.max(0.01, homeCoverProb), awayOdds: 1 / Math.max(0.01, awayCoverProb) };
+    }
+    function calculateDoubleChance(homeProb, drawProb, awayProb) {
+      return { homeOrDraw: homeProb + drawProb, awayOrDraw: awayProb + drawProb, homeOrAway: homeProb + awayProb, homeOdds: 1 / Math.max(0.01, homeProb + drawProb), awayOdds: 1 / Math.max(0.01, awayProb + drawProb), anyOdds: 1 / Math.max(0.01, homeProb + awayProb) };
+    }
+    function evaluateAsianHandicapResult(homeScore, awayScore, line) { let adjustedHome = homeScore - line; if (adjustedHome > awayScore) return 'home_win'; if (adjustedHome < awayScore) return 'away_win'; return 'push'; }
+    function evaluateDoubleChanceResult(homeScore, awayScore, betType) { const isHomeWin = homeScore > awayScore, isDraw = homeScore === awayScore, isAwayWin = homeScore < awayScore; if (betType === 'home_or_draw') return isHomeWin || isDraw; if (betType === 'away_or_draw') return isAwayWin || isDraw; if (betType === 'home_or_away') return isHomeWin || isAwayWin; return false; }
+    
+    (function spawnParticles(){
+      const c=$('particlesContainer');
+      for(let i=0;i<25;i++){ const p=document.createElement('div'); p.className='particle'; p.style.cssText=`left:${Math.random()*100}%;width:${Math.random()*3+1}px;height:${Math.random()*3+1}px;animation-duration:${Math.random()*15+8}s;animation-delay:${Math.random()*10}s;opacity:${Math.random()*0.5+0.1}`; c.appendChild(p); }
+    })();
+    
+    function showToast(msg,type='info'){ const t=document.createElement('div'); t.className=`toast ${type==='success'?'toast-success':type==='error'?'toast-error':''}`; t.textContent=msg; $('toastContainer').appendChild(t); setTimeout(()=>t.remove(),3200); }
+    
+    let confirmCallback=null;
+    function showConfirmModal(title,msg,cb){ $('confirmTitle').textContent=title; $('confirmMsg').textContent=msg; confirmCallback=cb; $('confirmModal').classList.remove('hidden'); }
+    function closeConfirmModal(){$('confirmModal').classList.add('hidden');confirmCallback=null;}
+    document.getElementById('confirmYes') && document.getElementById('confirmYes').addEventListener('click',()=>{if(confirmCallback)confirmCallback();closeConfirmModal();});
+    
+    function updateDBStatus(){ const indicator = $('dbStatusIndicator'); if(indicator){ indicator.textContent = '💾 LocalStorage Active'; indicator.className = 'db-status db-ready'; } }
+    async function dbAdd(record) { const history = await dbGetAll(); const newId = Date.now() + Math.random() * 10000; record.id = newId; history.push(record); localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history)); return newId; }
+    async function dbGetAll() { const data = localStorage.getItem(HISTORY_STORAGE_KEY); return data ? JSON.parse(data) : []; }
+    async function dbUpdate(record) { const history = await dbGetAll(); const index = history.findIndex(r => r.id === record.id); if (index !== -1) { history[index] = record; localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history)); } return record.id; }
+    async function dbDelete(id) { let history = await dbGetAll(); history = history.filter(r => r.id !== id); localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history)); }
+    async function dbClearAll() { localStorage.removeItem(HISTORY_STORAGE_KEY); }
+    function initHistoryStorage() { if (!localStorage.getItem(HISTORY_STORAGE_KEY)) { localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify([])); } console.log('LocalStorage history ready'); updateDBStatus(); }
+    
+    function initUsers(){let u=JSON.parse(localStorage.getItem(USK)||'[]');if(!u.find(x=>x.username==='demoUser'))u.push({username:'demoUser',password:'demo123',role:'user',approved:true});localStorage.setItem(USK,JSON.stringify(u));}
+    function loadData(){predMem=JSON.parse(localStorage.getItem(MMK)||'[]');calData=JSON.parse(localStorage.getItem(CCK)||'[]');let sw=JSON.parse(localStorage.getItem(WWK));if(sw)lw=sw;}
+    function saveData(){localStorage.setItem(MMK,JSON.stringify(predMem.slice(-200)));localStorage.setItem(CCK,JSON.stringify(calData.slice(-150)));localStorage.setItem(WWK,JSON.stringify(lw));}
+    function loginUser(){let u=$('loginUsername').value.trim(),p=$('loginPassword').value.trim(); let users=JSON.parse(localStorage.getItem(USK)||'[]');let user=users.find(x=>x.username===u&&x.password===p);if(!user){$('loginMessage').innerText='❌ Invalid';return;}curUser=user;sessionStorage.setItem(SSK,JSON.stringify(user));loadData();showApp();}
+    function registerUser(){let u=$('regUsername').value.trim(),p=$('regPassword').value.trim(),cp=$('regConfirmPassword').value.trim();if(p!==cp){$('registerMessage').innerText='❌ mismatch';return;}let users=JSON.parse(localStorage.getItem(USK)||'[]');if(users.find(x=>x.username===u)){$('registerMessage').innerText='Exists';return;}users.push({username:u,password:p,role:'user',approved:true});localStorage.setItem(USK,JSON.stringify(users));$('registerMessage').innerText='✅ Created! Login.';setTimeout(()=>{document.querySelector('[data-atab="login"]').click();},1000);}
+    function showApp(){$('authWrapper').classList.add('hidden');$('predictorApp').classList.remove('hidden');$('currentUserDisplay').innerText=curUser?.username;refreshSavedLeagues();updateCalDisplay();renderHistoryCards();refreshAnalytics();}
+    function logout(){sessionStorage.removeItem(SSK);curUser=null;$('predictorApp').classList.add('hidden');$('authWrapper').classList.remove('hidden');}
+    document.querySelectorAll('.auth-tab').forEach(t=>t.addEventListener('click',function(){document.querySelectorAll('.auth-tab').forEach(b=>{b.style.background='transparent';b.style.color='#94a3b8';});this.style.background='linear-gradient(135deg,rgba(0,255,255,0.2),rgba(255,0,200,0.1))';this.style.color='white';$('loginForm').style.display=this.dataset.atab==='login'?'block':'none';$('registerForm').style.display=this.dataset.atab==='register'?'block':'none';}));
+    document.getElementById('loginBtn').addEventListener('click',loginUser); document.getElementById('registerBtn').addEventListener('click',registerUser); document.getElementById('appLogoutBtn').addEventListener('click',logout);
+    
+    document.querySelectorAll('.page-menu-btn').forEach(b=>b.addEventListener('click',()=>{
+      document.querySelectorAll('.page-menu-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+      document.querySelectorAll('.page-content').forEach(p=>p.classList.add('hidden'));
+      const pageMap={auto:'autoPage',manual:'manualPage',history:'historyPage',analytics:'analyticsPage'};
+      $(pageMap[b.dataset.page])?.classList.remove('hidden');
+      if(b.dataset.page==='history')renderHistoryCards();
+      if(b.dataset.page==='analytics')refreshAnalytics();
+    }));
+    document.querySelectorAll('#manualPage .tab-nav-btn').forEach(b=>b.addEventListener('click',()=>{let p=b.closest('#manualPage');p.querySelectorAll('.tab-nav-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');p.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));p.querySelector('#'+b.dataset.mtab+'Tab').classList.add('active');if(b.dataset.mtab==='heatmap'&&lastXG)drawHeatmap(lastXG.homeXG,lastXG.awayXG);if(b.dataset.mtab==='betting'&&lastPred)renderBettingMarkets();}));
+    document.querySelectorAll('#autoPage .api-source-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#autoPage .api-source-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');autoSrc=b.dataset.asrc;}));
+    document.querySelectorAll('#manualPage .api-source-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#manualPage .api-source-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');manSrc=b.dataset.msrc;$('manualInputSection').classList.toggle('hidden',manSrc!=='manual');}));
+    
+    function computeElo(team){let elo=1500, K=25; for(let i=0;i<team.played;i++){let expected=0.5; let actual=i<team.won?1:(i<team.won+team.draw?0.5:0); elo+=K*(actual-expected);} return Math.round(elo);}
+    function getLeagueAvgPerTeam(){let avg=parseFloat($('computedAvg')?.value);if(isNaN(avg)||avg<=0)return 1.35; return avg/2;}
+    function computeXG(home,away){if(!home||!away)return null; let lAvgP=getLeagueAvgPerTeam(); let homeAttack=(home.gf/home.played)/lAvgP; let homeDefense=(home.ga/home.played)/lAvgP; let awayAttack=(away.gf/away.played)/lAvgP; let awayDefense=(away.ga/away.played)/lAvgP; let homeAdv=parseFloat($('homeAdvInput')?.value)||lw.homeAdv; let homeXG=Math.min(4.8,Math.max(0.2,homeAttack*awayDefense*lAvgP*homeAdv)); let awayXG=Math.min(4.8,Math.max(0.2,awayAttack*homeDefense*lAvgP)); let weather=$('weatherSelect')?.value; if(weather==='light_rain'){homeXG*=0.92; awayXG*=0.92;} return {homeXG,awayXG,homeAttack,homeDefense,awayAttack,awayDefense};}
+    const fact=(n)=>n<=1?1:n*fact(n-1);
+    const poisProb=(l,k)=>l<=0?(k===0?1:0):Math.exp(-l)*Math.pow(l,k)/fact(k);
+    function poissonScores(hxg,axg,maxG=8){let sc=[],hW=0,d=0,aW=0; for(let h=0;h<=maxG;h++) for(let a=0;a<=maxG;a++){let p=poisProb(hxg,h)*poisProb(axg,a); if(h===a&&h<=2)p*=1+0.1; sc.push({home:h,away:a,prob:p}); if(h>a)hW+=p; else if(h===a)d+=p; else aW+=p;} let total=hW+d+aW; hW/=total; d/=total; aW/=total; sc=sc.map(s=>({...s,prob:s.prob/total})).sort((a,b)=>b.prob-a.prob); return {scores:sc,homeWin:hW,draw:d,awayWin:aW};}
+    function monteCarloSim(hxg,axg,sims=18000){let cnt={},hW=0,d=0,aW=0; let poissonRand=(l)=>{let L=Math.exp(-l),p=1,k=0; do{k++;p*=Math.random();}while(p>L); return k-1;}; for(let i=0;i<sims;i++){let h=poissonRand(hxg),a=poissonRand(axg); let k=`${h}-${a}`; cnt[k]=(cnt[k]||0)+1; if(h>a)hW++; else if(h===a)d++; else aW++;} let sc=Object.entries(cnt).map(([k,v])=>{let [h,a]=k.split('-').map(Number); return {home:h,away:a,prob:v/sims};}).sort((a,b)=>b.prob-a.prob); return {scores:sc,homeWin:hW/sims,draw:d/sims,awayWin:aW/sims};}
+    async function trainTF(){if(tfModel){tfModel.dispose();} let trainX=[],trainY=[]; for(let i=0;i<600;i++){let ha=Math.random()*2+0.4,hd=Math.random()*2+0.4,aa=Math.random()*2+0.4,ad=Math.random()*2+0.4; let lAvg=1.4; let hx=ha*ad*lAvg*1.2, ax=aa*hd*lAvg; let hw=0,dr=0; let tot=0; for(let h=0;h<=5;h++)for(let a=0;a<=5;a++){let p=poisProb(hx,h)*poisProb(ax,a); tot+=p; if(h>a)hw+=p; else if(h===a)dr+=p;} hw/=tot; dr/=tot; let aw=1-hw-dr; let r=Math.random(); if(r<hw)trainY.push([1,0,0]); else if(r<hw+dr)trainY.push([0,1,0]); else trainY.push([0,0,1]); trainX.push([ha,hd,aa,ad]);} let xs=tf.tensor2d(trainX),ys=tf.tensor2d(trainY); tfModel=tf.sequential(); tfModel.add(tf.layers.dense({units:8,activation:'relu',inputShape:[4]})); tfModel.add(tf.layers.dense({units:4,activation:'relu'})); tfModel.add(tf.layers.dense({units:3,activation:'softmax'})); tfModel.compile({optimizer:tf.train.adam(0.008),loss:'categoricalCrossentropy'}); await tfModel.fit(xs,ys,{epochs:25,shuffle:true,verbose:0}); xs.dispose();ys.dispose(); tfTrained=true;}
+    function predictTF(ha,hd,aa,ad){if(!tfModel)return null; let input=tf.tensor2d([[ha,hd,aa,ad]]); let pred=tfModel.predict(input).dataSync(); input.dispose(); return {homeWin:pred[0],draw:pred[1],awayWin:pred[2]};}
+    async function runFullPrediction(home,away){let xg=computeXG(home,away); if(!xg)return null; lastXG=xg; let poissonRes=poissonScores(xg.homeXG,xg.awayXG,8); let mcRes=monteCarloSim(xg.homeXG,xg.awayXG,18000); let nnRes=null; if(tfTrained)nnRes=predictTF(xg.homeAttack,xg.homeDefense,xg.awayAttack,xg.awayDefense); let ensHome=(poissonRes.homeWin*0.4+mcRes.homeWin*0.3+(nnRes?nnRes.homeWin:poissonRes.homeWin)*0.3); let ensDraw=(poissonRes.draw*0.4+mcRes.draw*0.3+(nnRes?nnRes.draw:poissonRes.draw)*0.3); let ensAway=1-ensHome-ensDraw; let ensScores=poissonRes.scores.map(s=>({...s,prob:s.prob*0.6+(mcRes.scores.find(m=>m.home===s.home&&m.away===s.away)?.prob||0)*0.4})); let tot=ensScores.reduce((a,b)=>a+b.prob,0); ensScores=ensScores.map(s=>({...s,prob:s.prob/tot})).sort((a,b)=>b.prob-a.prob); let asianHandicap = calculateAsianHandicap(ensHome, ensDraw, ensAway, currentAsianLine); let doubleChance = calculateDoubleChance(ensHome, ensDraw, ensAway); return {xg,poisson:poissonRes,montecarlo:mcRes,neural:nnRes,ensemble:{scores:ensScores,homeWin:ensHome,draw:ensDraw,awayWin:ensAway,asianHandicap,doubleChance}};}
+    function buildModelCard(title,modelRes,isEnsemble=false,topN=4){let scores=modelRes.scores.slice(0,topN);let allScores=modelRes.scores.slice(0,10); let asianHtml = '', doubleHtml = ''; if(isEnsemble && modelRes.asianHandicap && modelRes.doubleChance){ asianHtml = `<div class="outcome-item"><div class="label">🌏 AH ${modelRes.asianHandicap.line}</div><div class="value" style="font-size:0.7rem">🏠 ${(modelRes.asianHandicap.homeCover*100).toFixed(1)}%<br>✈️ ${(modelRes.asianHandicap.awayCover*100).toFixed(1)}%</div></div>`; doubleHtml = `<div class="outcome-item"><div class="label">🎲 DC</div><div class="value" style="font-size:0.7rem">1X ${(modelRes.doubleChance.homeOrDraw*100).toFixed(1)}%<br>X2 ${(modelRes.doubleChance.awayOrDraw*100).toFixed(1)}%</div></div>`; } return `<div class="model-card${isEnsemble?' ensemble':''}"><h4 style="color:${isEnsemble?'var(--neon-yellow)':'var(--neon-cyan)'};">${title}</h4><div class="top-scores">${scores.map(s=>`<div class="score-badge"><strong>${s.home}-${s.away}</strong><br><small>${(s.prob*100).toFixed(1)}%</small></div>`).join('')}</div><div class="outcome-row"><div class="outcome-item"><div class="label">🏠 HOME</div><div class="value">${(modelRes.homeWin*100).toFixed(1)}%</div></div><div class="outcome-item"><div class="label">🤝 DRAW</div><div class="value">${(modelRes.draw*100).toFixed(1)}%</div></div><div class="outcome-item"><div class="label">✈️ AWAY</div><div class="value">${(modelRes.awayWin*100).toFixed(1)}%</div></div>${asianHtml}${doubleHtml}</div><table class="prob-table"><tbody>${allScores.map(s=>`<tr><td width="50">${s.home}-${s.away}</td><td width="45">${(s.prob*100).toFixed(1)}%</td><td><span class="prob-bar" style="width:${Math.min(80,s.prob/allScores[0].prob*70)}px;"></span></td></tr>`).join('')}</tbody></table></div>`;}
+    function renderBettingMarkets(){if(!lastPred)return; let m=calcMarkets(lastPred.ensemble.scores); let ah = lastPred.ensemble.asianHandicap; let dc = lastPred.ensemble.doubleChance; let html=''; let items=[{l:'🏠 HOME WIN',p:m.homeWin},{l:'🤝 DRAW',p:m.draw},{l:'✈️ AWAY WIN',p:m.awayWin},{l:'OVER 1.5',p:m.o15},{l:'UNDER 1.5',p:m.u15},{l:'OVER 2.5',p:m.o25},{l:'UNDER 2.5',p:m.u25},{l:'BTTS YES',p:m.bttsY},{l:'BTTS NO',p:m.bttsN}]; items.forEach(x=>{html+=`<div class="betting-card ${x.p>0.6?'highlight':''}"><div class="bet-label">${x.l}</div><div class="bet-prob">${(x.p*100).toFixed(1)}%</div><div class="bet-odds">Odds ${(1/x.p).toFixed(2)}</div></div>`;}); html+=`<div class="betting-card"><div class="bet-label">🌏 AH ${ah.line}</div><div class="bet-prob">🏠 ${(ah.homeCover*100).toFixed(1)}% | ✈️ ${(ah.awayCover*100).toFixed(1)}%</div><div class="bet-odds">${ah.homeOdds.toFixed(2)} / ${ah.awayOdds.toFixed(2)}</div></div>`; html+=`<div class="betting-card"><div class="bet-label">🎲 1X (HOME/DRAW)</div><div class="bet-prob">${(dc.homeOrDraw*100).toFixed(1)}%</div><div class="bet-odds">${dc.homeOdds.toFixed(2)}</div></div>`; html+=`<div class="betting-card"><div class="bet-label">🎲 X2 (AWAY/DRAW)</div><div class="bet-prob">${(dc.awayOrDraw*100).toFixed(1)}%</div><div class="bet-odds">${dc.awayOdds.toFixed(2)}</div></div>`; $('bettingMarkets').innerHTML=html;}
+    function calcMarkets(scores){let hW=0,d=0,aW=0,o15=0,u15=0,o25=0,u25=0,bttsY=0,bttsN=0; scores.forEach(s=>{if(s.home>s.away)hW+=s.prob;else if(s.home===s.away)d+=s.prob;else aW+=s.prob; let tg=s.home+s.away; if(tg>1.5)o15+=s.prob; else u15+=s.prob; if(tg>2.5)o25+=s.prob; else u25+=s.prob; if(s.home>0&&s.away>0)bttsY+=s.prob; else bttsN+=s.prob;}); return {homeWin:hW,draw:d,awayWin:aW,o15,u15,o25,u25,bttsY,bttsN};}
+    function drawHeatmap(hxg,axg){let grid=$('heatmapGrid'); if(!grid)return; let html='<div style="grid-column:1/9;text-align:center;font-size:0.6rem;">AWAY →</div>'; for(let h=0;h<=7;h++){html+=`<div style="font-size:0.5rem;align-self:center;">${h}</div>`; for(let a=0;a<=7;a++){let p=poisProb(hxg,h)*poisProb(axg,a); let intensity=Math.min(0.85,p*14); html+=`<div class="heatmap-cell" style="background:rgba(0,255,255,${intensity});" title="${h}-${a}: ${(p*100).toFixed(2)}%">${h}-${a}</div>`;}} grid.innerHTML=html;}
+    async function calculateAll(){if(!selHome||!selAway){$('resultsContainer').innerHTML='<p style="color:var(--muted);">Select both teams</p>'; return;} let pred=await runFullPrediction(selHome,selAway); if(!pred)return; lastPred=pred; let html=buildModelCard('📊 POISSON (Dixon‑Coles)',pred.poisson,false,4)+buildModelCard('🎲 MONTE CARLO (18k)',pred.montecarlo,false,4); if(pred.neural)html+=`<div class="model-card"><h4 style="color:var(--neon-magenta);">🧠 NEURAL NET</h4><div class="outcome-row"><div class="outcome-item"><div class="label">🏠 HOME</div><div class="value">${(pred.neural.homeWin*100).toFixed(1)}%</div></div><div class="outcome-item"><div class="label">🤝 DRAW</div><div class="value">${(pred.neural.draw*100).toFixed(1)}%</div></div><div class="outcome-item"><div class="label">✈️ AWAY</div><div class="value">${(pred.neural.awayWin*100).toFixed(1)}%</div></div></div><div class="note">Based on attack/defense strengths</div></div>`; html+=buildModelCard('⭐ ENSEMBLE (Poisson+MC+NN)',pred.ensemble,true,4); $('resultsContainer').innerHTML=html; drawHeatmap(pred.xg.homeXG,pred.xg.awayXG); renderBettingMarkets();}
+    async function trainAndPredictTF(){if(!selHome||!selAway){alert('Select teams');return;} if(!tfTrained){$('resultsContainer').innerHTML='<p style="color:cyan;"><span class="spinner"></span> Training Neural Network...</p>'; await trainTF();} calculateAll();}
+    function updateManualTeam(side){let select=$(side==='home'?'homeSelect':'awaySelect'); let t=allTeams.find(x=>x.name===select.value); if(side==='home')selHome=t; else selAway=t; if(t){let sDiv=$(side+'Stats'); sDiv.innerHTML=`<div class="stat-row"><div class="stat-item"><label>P</label><div>${t.played}</div></div><div class="stat-item"><label>W</label><div>${t.won}</div></div><div class="stat-item"><label>D</label><div>${t.draw}</div></div><div class="stat-item"><label>L</label><div>${t.lost}</div></div></div><div class="stat-row"><div class="stat-item"><label>GF</label><div>${t.gf}</div></div><div class="stat-item"><label>GA</label><div>${t.ga}</div></div><div class="stat-item"><label>GD</label><div>${t.gd}</div></div></div>`; $(side+'Elo').innerHTML=`⚡ Elo: ${computeElo(t)}`;} else{$(side+'Stats').innerHTML='<p style="color:var(--muted);">Awaiting</p>'; $(side+'Elo').innerHTML='';} if(selHome&&selAway)calculateAll();}
+    
+    async function fetchManualStandings(){let comp=$('manualCompSelect').value; if(!comp)return; if(manSrc==='manual'){$('manualInputSection').classList.remove('hidden');refreshSavedLeagues();return;} try{ let url = getApiUrl(manSrc, 'standings', { competitionId: comp }); let res=await fetch(url); let data=await res.json(); if(!res.ok){throw new Error(data.error || 'API error');} allTeams=[]; let entries = manSrc === 'football-data' ? (data.standings?.[0]?.table||[]) : (data.response?.[0]?.league?.standings?.[0]||[]); entries.forEach(e=>{ if(manSrc === 'football-data'){ allTeams.push({name:e.team.name,shortName:e.team.shortName,played:e.playedGames,won:e.won,draw:e.draw,lost:e.lost,gf:e.goalsFor,ga:e.goalsAgainst,gd:e.goalDifference,points:e.points,position:e.position}); } else { allTeams.push({name:e.team.name,shortName:e.team.name,played:e.all.played,won:e.all.win,draw:e.all.draw,lost:e.all.lose,gf:e.all.goals.for,ga:e.all.goals.against,gd:e.goalsDiff,points:e.points,position:e.rank}); } }); currentLeagueName=comp; populateTeamSelectors(); let totalG=allTeams.reduce((s,t)=>s+t.gf,0); let matches=allTeams.reduce((s,t)=>s+t.played,0)/2; $('computedAvg').value=(totalG/Math.max(1,matches)).toFixed(2); $('standingsPreview').innerHTML=`✅ ${currentLeagueName} - ${allTeams.length} teams`; autoCalibrate();}catch(e){alert('API error: '+e.message);}}
+    
+    function populateTeamSelectors(){let opts='<option value="">-- Select --</option>'; allTeams.forEach(t=>opts+=`<option value="${t.name}">${t.name}</option>`); $('homeSelect').innerHTML=opts; $('awaySelect').innerHTML=opts;}
+    function autoCalibrate(){let haMap={PL:1.2,PD:1.18,BL1:1.22,SA:1.16,FL1:1.19}; let c=$('manualCompSelect').value; if(haMap[c])$('homeAdvInput').value=haMap[c];}
+    function parseManualTable(){let raw=$('manualTableInput').value; if(!raw)return; let lines=raw.split('\n'); allTeams=[]; for(let line of lines){let parts=line.split('|').map(s=>s.trim()).filter(s=>s); if(parts.length<8)continue; let gls=parts[6].split(':'); if(gls.length<2)continue; allTeams.push({name:parts[1],played:parseInt(parts[2]),won:parseInt(parts[3]),draw:parseInt(parts[4]),lost:parseInt(parts[5]),gf:parseInt(gls[0]),ga:parseInt(gls[1]),gd:parseInt(gls[0])-parseInt(gls[1]),points:parseInt(parts[7]),position:parseInt(parts[0])});} if(allTeams.length)populateTeamSelectors(); let tg=allTeams.reduce((s,t)=>s+t.gf,0); let tm=allTeams.reduce((s,t)=>s+t.played,0)/2; $('computedAvg').value=(tg/Math.max(1,tm)).toFixed(2); $('manualParseMsg').innerHTML='✅ Parsed';}
+    function saveManualLeague(){let name=$('manualLeagueName').value.trim(); let raw=$('manualTableInput').value; if(!name||!raw)return; let leagues=JSON.parse(localStorage.getItem(LLK)||'{}'); leagues[name]={raw,teams:allTeams,date:Date.now()}; localStorage.setItem(LLK,JSON.stringify(leagues)); refreshSavedLeagues();}
+    function refreshSavedLeagues(){let sec=$('savedLeaguesSection'); let leagues=JSON.parse(localStorage.getItem(LLK)||'{}'); let keys=Object.keys(leagues); if(!keys.length){sec.classList.add('hidden');return;} sec.classList.remove('hidden'); sec.innerHTML=keys.map(k=>`<span class="saved-league-item" onclick="loadSavedLeague('${k.replace(/'/g,"\\'")}')">${k}</span>`).join('')+'<span class="saved-league-item" onclick="deleteAllLeagues()">🗑 CLEAR</span>';}
+    window.loadSavedLeague=function(name){let leagues=JSON.parse(localStorage.getItem(LLK)||'{}'); let data=leagues[name]; if(data){allTeams=data.teams; populateTeamSelectors(); $('manualTableInput').value=data.raw; $('computedAvg').value=(allTeams.reduce((s,t)=>s+t.gf,0)/(allTeams.reduce((s,t)=>s+t.played,0)/2)).toFixed(2); $('standingsPreview').innerHTML=`✅ Loaded ${name}`; selHome=selAway=null; currentLeagueName=name;}};
+    window.deleteAllLeagues=function(){localStorage.removeItem(LLK);refreshSavedLeagues();};
+    window.fetchRecentMatches=async function(){if(!selHome||!selAway)return; try{ let url = getApiUrl(manSrc, 'team-matches', { teamId: selHome.teamId }); let res=await fetch(url); let data=await res.json(); realForm[selHome.name]=[]; calculateAll(); }catch(e){}};
+    function logManualResult(){if(!lastPred){alert('No prediction');return;} let hg=parseInt($('actualHomeGoals').value)||0,ag=parseInt($('actualAwayGoals').value)||0; calData.push({home:selHome.name,away:selAway.name,predicted:lastPred.ensemble.scores[0],actual:{home:hg,away:ag}}); saveData(); updateCalDisplay(); $('learningInsights').innerHTML=`<div style="background:rgba(0,255,136,0.1);border-radius:8px;padding:0.3rem;">✅ Logged: ${selHome.name} ${hg}-${ag} ${selAway.name}</div>`;}
+    function logAutoResult(homeName,awayName,predHome,predAway){let hg=parseInt(prompt(`Actual home goals for ${homeName}:`,'0')||'0'); let ag=parseInt(prompt(`Actual away goals for ${awayName}:`,'0')||'0'); if(isNaN(hg)||isNaN(ag))return; calData.push({home:homeName,away:awayName,predicted:{home:predHome,away:predAway},actual:{home:hg,away:ag}}); saveData(); updateCalDisplay(); alert('Result logged for learning system!');}
+    function selfLearn(){let v=calData.filter(c=>c.actual); if(v.length<3){alert('Need at least 3 logged results for meaningful learning.');return;} let err=0; v.forEach(x=>{err+=Math.abs(x.predicted.home-x.actual.home)+Math.abs(x.predicted.away-x.actual.away);}); let avgErr=err/v.length; if(avgErr>2.2)lw.formW=Math.min(0.9,lw.formW+0.03); else if(avgErr<1.5)lw.formW=Math.max(0.3,lw.formW-0.02); saveData(); updateCalDisplay(); $('learningInsights').innerHTML=`<div style="background:rgba(0,255,136,0.1);border-radius:8px;padding:0.3rem;">🧠 Learning applied: new formWeight = ${lw.formW.toFixed(2)} (based on ${v.length} samples, avg error ${avgErr.toFixed(2)})</div>`;}
+    function updateCalDisplay(){let v=calData.filter(c=>c.actual); $('calibrationStats').innerHTML=`<div class="stat-row"><div class="stat-item"><label>📊 Logged matches</label><div class="val">${v.length}</div></div><div class="stat-item"><label>📈 Learning active</label><div class="val">✅</div></div></div>`;}
+    
+    async function fetchAutoLeagueData(){const comp=$('autoCompSelect').value; if(!comp){alert('Select league');return;} $('autoStatus').innerHTML='<span class="spinner"></span> Loading league standings...'; try{ let url = getApiUrl(autoSrc, 'standings', { competitionId: comp }); let res=await fetch(url); let data=await res.json(); if(!res.ok){throw new Error(data.error || 'API error');} allTeams=[]; let entries = autoSrc === 'football-data' ? (data.standings?.[0]?.table||[]) : (data.response?.[0]?.league?.standings?.[0]||[]); entries.forEach(e=>{ if(autoSrc === 'football-data'){ allTeams.push({name:e.team.name,shortName:e.team.shortName||e.team.name,played:e.playedGames,won:e.won,draw:e.draw,lost:e.lost,gf:e.goalsFor,ga:e.goalsAgainst,gd:e.goalDifference,points:e.points,position:e.position}); } else { allTeams.push({name:e.team.name,shortName:e.team.name,played:e.all.played,won:e.all.win,draw:e.all.draw,lost:e.all.lose,gf:e.all.goals.for,ga:e.all.goals.against,gd:e.goalsDiff,points:e.points,position:e.rank}); } }); currentLeagueName=comp; let totalG=allTeams.reduce((s,t)=>s+t.gf,0); let matches=allTeams.reduce((s,t)=>s+t.played,0)/2; $('computedAvg').value=(totalG/Math.max(1,matches)).toFixed(2); $('standingsPreview').innerHTML=`✅ League loaded: ${currentLeagueName} (${allTeams.length} teams)`; $('autoStatus').innerHTML='<span class="spinner"></span> Fetching fixtures...'; let fixUrl = getApiUrl(autoSrc, 'matches', { competitionId: comp }); let fixRes=await fetch(fixUrl); let fixData=await fixRes.json(); let matchesList = autoSrc === 'football-data' ? (fixData.matches||[]) : (fixData.response||[]); upcomingFix=matchesList.map(m=>({home:autoSrc==='football-data'?m.homeTeam.name:m.teams.home.name,away:autoSrc==='football-data'?m.awayTeam.name:m.teams.away.name,date:autoSrc==='football-data'?m.utcDate:m.fixture.date,homeId:m.homeTeam?.id,m.awayTeam?.id})); renderAutoFixtures(); $('autoStatus').innerHTML=`✅ ${upcomingFix.length} fixtures ready.`; }catch(e){console.error(e);$('autoStatus').innerHTML='❌ Error loading data: '+e.message;}}
+    function renderAutoFixtures(){let container=$('fixtureList'); if(!container)return; if(!upcomingFix.length){container.innerHTML='<p style="color:var(--muted);">No upcoming fixtures found</p>';return;} let html=''; upcomingFix.forEach((f,idx)=>{ let dateStr=new Date(f.date).toLocaleString(); html+=`<div class="fixture-item" id="fixcard-${idx}"><div class="fixture-header"><div><strong>${f.home}</strong> vs <strong>${f.away}</strong><div class="fixture-date">📅 ${dateStr}</div></div><div style="display:flex;gap:0.3rem;flex-wrap:wrap"><button class="btn-primary btn-sm" onclick="predictAutoFixture(${idx})">🔮 PREDICT</button><button class="save-hist-btn" onclick="saveAutoFixtureToHistory(${idx})">💾 SAVE</button></div></div><div id="fixpred-${idx}" style="margin-top:0.5rem;"></div></div>`;}); container.innerHTML=html;}
+    window.predictAutoFixture=async function(idx){let f=upcomingFix[idx]; let homeTeam=allTeams.find(t=>t.name===f.home); let awayTeam=allTeams.find(t=>t.name===f.away); if(!homeTeam){ let avgGF=allTeams.reduce((s,t)=>s+t.gf,0)/Math.max(1,allTeams.length); let avgGA=allTeams.reduce((s,t)=>s+t.ga,0)/Math.max(1,allTeams.length); homeTeam={name:f.home,played:20,won:8,draw:5,lost:7,gf:Math.round(avgGF),ga:Math.round(avgGA),gd:0,points:29,position:10};} if(!awayTeam){ let avgGF=allTeams.reduce((s,t)=>s+t.gf,0)/Math.max(1,allTeams.length); let avgGA=allTeams.reduce((s,t)=>s+t.ga,0)/Math.max(1,allTeams.length); awayTeam={name:f.away,played:20,won:7,draw:5,lost:8,gf:Math.round(avgGF),ga:Math.round(avgGA),gd:0,points:26,position:11};} selHome=homeTeam; selAway=awayTeam; let pred=await runFullPrediction(selHome,selAway); if(!pred)return; lastPred=pred; upcomingFix[idx]._pred=pred; let htmlScores=buildModelCard('📊 POISSON',pred.poisson,false,4)+buildModelCard('🎲 MONTE CARLO',pred.montecarlo,false,4); if(pred.neural)htmlScores+=`<div class="model-card"><h4 style="color:var(--neon-magenta);">🧠 NEURAL NET</h4><div class="outcome-row"><div class="outcome-item"><div class="label">🏠 HOME</div><div class="value">${(pred.neural.homeWin*100).toFixed(1)}%</div></div><div class="outcome-item"><div class="label">🤝 DRAW</div><div class="value">${(pred.neural.draw*100).toFixed(1)}%</div></div><div class="outcome-item"><div class="label">✈️ AWAY</div><div class="value">${(pred.neural.awayWin*100).toFixed(1)}%</div></div></div><div class="note">Attack/Defense NN</div></div>`; htmlScores+=buildModelCard('⭐ ENSEMBLE',pred.ensemble,true,4); let marketsHtml='<h5 class="market-section-title">💰 BETTING MARKETS</h5><div class="betting-grid">'+buildMarketsHTML(pred.ensemble.scores, pred.ensemble.asianHandicap, pred.ensemble.doubleChance)+'</div>'; let heatmapContainer='<h5 class="market-section-title">🔥 CORRECT SCORE HEATMAP</h5><div class="heatmap-grid" id="autoHeatmapGrid'+idx+'"></div>'; let logBtn=`<div style="text-align:center;margin-top:0.8rem;display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center"><button class="btn-sm btn-warning" onclick="logAutoResult('${selHome.name.replace(/'/g,"\\'")}','${selAway.name.replace(/'/g,"\\'")}',${pred.ensemble.scores[0].home},${pred.ensemble.scores[0].away})">📝 Log Result</button><button class="save-hist-btn" onclick="saveAutoFixtureToHistory(${idx})">💾 SAVE TO HISTORY</button></div>`; let predDiv=document.getElementById(`fixpred-${idx}`); if(predDiv){ predDiv.innerHTML=htmlScores+marketsHtml+heatmapContainer+logBtn; let heatmapGrid=document.getElementById(`autoHeatmapGrid${idx}`); if(heatmapGrid){ let hxg=pred.xg.homeXG, axg=pred.xg.awayXG; let hmHTML='<div style="grid-column:1/9;text-align:center;font-size:0.5rem;">AWAY →</div>'; for(let h=0;h<=7;h++){hmHTML+=`<div style="font-size:0.45rem;">${h}</div>`; for(let a=0;a<=7;a++){let p=poisProb(hxg,h)*poisProb(axg,a); let inten=Math.min(0.85,p*14); hmHTML+=`<div class="heatmap-cell" style="background:rgba(0,255,255,${inten});">${h}-${a}</div>`;}} heatmapGrid.innerHTML=hmHTML; } } };
+    function buildMarketsHTML(scores, ah, dc){let m=calcMarkets(scores); let items=[{l:'🏠 HOME WIN',p:m.homeWin},{l:'🤝 DRAW',p:m.draw},{l:'✈️ AWAY WIN',p:m.awayWin},{l:'OVER 1.5',p:m.o15},{l:'UNDER 1.5',p:m.u15},{l:'OVER 2.5',p:m.o25},{l:'UNDER 2.5',p:m.u25},{l:'BTTS YES',p:m.bttsY},{l:'BTTS NO',p:m.bttsN}]; let html = items.map(x=>`<div class="betting-card ${x.p>0.6?'highlight':''}"><div class="bet-label">${x.l}</div><div class="bet-prob">${(x.p*100).toFixed(1)}%</div><div class="bet-odds">Odds ${(1/x.p).toFixed(2)}</div></div>`).join(''); if(ah) html+=`<div class="betting-card"><div class="bet-label">🌏 AH ${ah.line}</div><div class="bet-prob">🏠 ${(ah.homeCover*100).toFixed(1)}% | ✈️ ${(ah.awayCover*100).toFixed(1)}%</div><div class="bet-odds">${ah.homeOdds.toFixed(2)} / ${ah.awayOdds.toFixed(2)}</div></div>`; if(dc) { html+=`<div class="betting-card"><div class="bet-label">🎲 1X</div><div class="bet-prob">${(dc.homeOrDraw*100).toFixed(1)}%</div><div class="bet-odds">${dc.homeOdds.toFixed(2)}</div></div>`; html+=`<div class="betting-card"><div class="bet-label">🎲 X2</div><div class="bet-prob">${(dc.awayOrDraw*100).toFixed(1)}%</div><div class="bet-odds">${dc.awayOdds.toFixed(2)}</div></div>`; } return html;}
+    window.autoPredictAll=function(){if(!upcomingFix.length){alert('No fixtures loaded.');return;} upcomingFix.forEach((_,i)=>predictAutoFixture(i));};
+    
+    async function saveCurrentToHistory() {
+        if (!lastPred || !selHome || !selAway) { showToast('❌ No prediction to save', 'error'); return; }
+        const m = calcMarkets(lastPred.ensemble.scores); const ah = lastPred.ensemble.asianHandicap; const dc = lastPred.ensemble.doubleChance;
+        const record = { homeTeam: selHome.name, awayTeam: selAway.name, leagueName: currentLeagueName || 'Manual', matchDate: new Date().toLocaleDateString(), matchTime: new Date().toLocaleTimeString(), predictedScores: lastPred.ensemble.scores.slice(0, 4).map(s => ({ home: s.home, away: s.away, prob: (s.prob * 100).toFixed(1) })), predictedMarkets: { homeWin: (m.homeWin * 100).toFixed(1), draw: (m.draw * 100).toFixed(1), awayWin: (m.awayWin * 100).toFixed(1), over25: (m.o25 * 100).toFixed(1), under25: (m.u25 * 100).toFixed(1), over15: (m.o15 * 100).toFixed(1), under15: (m.u15 * 100).toFixed(1), bttsY: (m.bttsY * 100).toFixed(1), bttsN: (m.bttsN * 100).toFixed(1) }, predictedAsianHandicap: { line: ah.line, homeCover: (ah.homeCover * 100).toFixed(1), awayCover: (ah.awayCover * 100).toFixed(1), homeOdds: ah.homeOdds.toFixed(2), awayOdds: ah.awayOdds.toFixed(2) }, predictedDoubleChance: { homeOrDraw: (dc.homeOrDraw * 100).toFixed(1), awayOrDraw: (dc.awayOrDraw * 100).toFixed(1), homeOrAway: (dc.homeOrAway * 100).toFixed(1) }, xgHome: lastPred.xg.homeXG.toFixed(2), xgAway: lastPred.xg.awayXG.toFixed(2), ftHome: null, ftAway: null, status: 'pending', marketResults: {}, asianHandicapResult: null, doubleChanceResults: {}, correctScoreHit: null, notes: '', timestamp: Date.now(), savedTimestamp: new Date().toLocaleString() };
+        try { const id = await dbAdd(record); showToast(`✅ Saved to localStorage: ${selHome.name} vs ${selAway.name}`, 'success'); renderHistoryCards(); refreshAnalytics(); } catch (e) { console.error('Save error:', e); showToast('❌ Save failed', 'error'); }
+    }
+    
+    window.saveAutoFixtureToHistory = async function(idx) { const f = upcomingFix[idx]; const pred = f._pred; if (!pred) { showToast('⚠️ Predict first, then save', 'error'); return; } const m = calcMarkets(pred.ensemble.scores); const ah = pred.ensemble.asianHandicap; const dc = pred.ensemble.doubleChance; const record = { homeTeam: f.home, awayTeam: f.away, leagueName: currentLeagueName || 'Auto', matchDate: new Date(f.date).toLocaleDateString(), matchTime: new Date(f.date).toLocaleTimeString(), predictedScores: pred.ensemble.scores.slice(0, 4).map(s => ({ home: s.home, away: s.away, prob: (s.prob * 100).toFixed(1) })), predictedMarkets: { homeWin: (m.homeWin * 100).toFixed(1), draw: (m.draw * 100).toFixed(1), awayWin: (m.awayWin * 100).toFixed(1), over25: (m.o25 * 100).toFixed(1), under25: (m.u25 * 100).toFixed(1), over15: (m.o15 * 100).toFixed(1), under15: (m.u15 * 100).toFixed(1), bttsY: (m.bttsY * 100).toFixed(1), bttsN: (m.bttsN * 100).toFixed(1) }, predictedAsianHandicap: { line: ah.line, homeCover: (ah.homeCover * 100).toFixed(1), awayCover: (ah.awayCover * 100).toFixed(1), homeOdds: ah.homeOdds.toFixed(2), awayOdds: ah.awayOdds.toFixed(2) }, predictedDoubleChance: { homeOrDraw: (dc.homeOrDraw * 100).toFixed(1), awayOrDraw: (dc.awayOrDraw * 100).toFixed(1), homeOrAway: (dc.homeOrAway * 100).toFixed(1) }, xgHome: pred.xg.homeXG.toFixed(2), xgAway: pred.xg.awayXG.toFixed(2), ftHome: null, ftAway: null, status: 'pending', marketResults: {}, asianHandicapResult: null, doubleChanceResults: {}, correctScoreHit: null, notes: '', timestamp: Date.now(), savedTimestamp: new Date().toLocaleString() }; try { const id = await dbAdd(record); showToast(`✅ Saved to localStorage: ${f.home} vs ${f.away}`, 'success'); } catch (e) { console.error('Save error:', e); showToast('❌ Save failed', 'error'); } };
+    
+    function setHistoryFilter(f){ currentHistoryFilter=f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.hf===f)); renderHistoryCards(); }
+    function filterRecords(records){ const now=new Date(); const search=($('historySearch')?.value||'').toLowerCase(); return records.filter(r=>{ const s=search; const matchSearch=!s||r.homeTeam.toLowerCase().includes(s)||r.awayTeam.toLowerCase().includes(s)||(r.leagueName||'').toLowerCase().includes(s)||(r.ftHome!=null?`${r.ftHome}-${r.ftAway}`:'' ).includes(s); if(!matchSearch)return false; const ts=new Date(r.timestamp); const isSameDay=(a,b)=>a.toDateString()===b.toDateString(); const sameWeek=(a,b)=>{const d=new Date(b);d.setDate(d.getDate()-d.getDay());return a>=d;}; const sameMonth=(a,b)=>a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear(); const sameYear=(a,b)=>a.getFullYear()===b.getFullYear(); switch(currentHistoryFilter){ case 'today': return isSameDay(ts,now); case 'week': return sameWeek(ts,now); case 'month': return sameMonth(ts,now); case 'year': return sameYear(ts,now); case 'wins': return r.status==='win'; case 'losses': return r.status==='loss'; case 'pending': return r.status==='pending'; case 'cshits': return r.correctScoreHit===true; case 'doublechance': return r.doubleChanceResults && (r.doubleChanceResults.homeOrDraw===true || r.doubleChanceResults.awayOrDraw===true); case 'asian': return r.asianHandicapResult && r.asianHandicapResult !== 'push'; default: return true; } }); }
+    function sortRecords(records){ const s=$('historySort')?.value||'newest'; return [...records].sort((a,b)=>{ if(s==='newest')return b.timestamp-a.timestamp; if(s==='oldest')return a.timestamp-b.timestamp; if(s==='wins'){const ws={'win':0,'half-win':1,'pending':2,'loss':3};return (ws[a.status]||2)-(ws[b.status]||2);} if(s==='losses'){const ls={'loss':0,'half-win':1,'pending':2,'win':3};return (ls[a.status]||2)-(ls[b.status]||2);} return b.timestamp-a.timestamp; }); }
+    async function renderHistoryCards(){ const container=$('historyCardsList'); if(!container)return; try { const all=await dbGetAll(); const filtered=filterRecords(all); const sorted=sortRecords(filtered); $('historyCount').textContent=`Showing ${sorted.length} of ${all.length} records`; if(!sorted.length){container.innerHTML=`<div class="empty-history"><span class="empty-icon">📭</span>No history found. Make predictions and save them!</div>`;return;} container.innerHTML=sorted.map((r,i)=>buildHistoryCard(r,i)).join(''); } catch(e) { console.error('Render error:', e); container.innerHTML='<div class="empty-history"><span class="empty-icon">⚠️</span>Error loading history. Try refreshing.</div>'; } }
+    function buildHistoryCard(r,animIdx){ const pending=r.status==='pending', win=r.status==='win', loss=r.status==='loss', halfWin=r.status==='half-win'; const cardClass=win?'win-card':halfWin?'half-win-card':loss?'loss-card':'pending-card'; const badge=win?`<span class="status-badge badge-win">✅ WIN</span>`:halfWin?`<span class="status-badge badge-half-win">🟠 HALF WIN</span>`:loss?`<span class="status-badge badge-loss">❌ LOSS</span>`:`<span class="status-badge badge-pending">⏳ PENDING</span>`; const ftDisplay=r.ftHome!=null?`<div class="hcard-ft-score ${win?'win-score':halfWin?'half-win-score':loss?'loss-score':''}">${r.ftHome}-${r.ftAway}</div>`:`<div class="hcard-vs">vs</div>`; const homeLogo=`<div class="hcard-team-logo">${r.homeTeam.charAt(0)}</div>`; const awayLogo=`<div class="hcard-team-logo">${r.awayTeam.charAt(0)}</div>`; const markets=buildMarketResultBoxes(r); const csBoxes=buildCSBoxes(r); const ahDisplay = r.predictedAsianHandicap ? `<div style="font-size:0.45rem;color:var(--half-win-color);margin-top:0.2rem">🌏 AH ${r.predictedAsianHandicap.line}: ${r.asianHandicapResult ? (r.asianHandicapResult === 'home_win' ? '🏠 WIN' : r.asianHandicapResult === 'away_win' ? '✈️ WIN' : 'PUSH') : 'PENDING'}</div>` : ''; const dcDisplay = r.predictedDoubleChance ? `<div style="font-size:0.45rem;color:var(--neon-cyan);margin-top:0.2rem">🎲 DC: ${r.doubleChanceResults?.homeOrDraw === true ? '1X ✓' : r.doubleChanceResults?.homeOrDraw === false ? '1X ✗' : '?'} | ${r.doubleChanceResults?.awayOrDraw === true ? 'X2 ✓' : r.doubleChanceResults?.awayOrDraw === false ? 'X2 ✗' : '?'}</div>` : ''; const ftLogger=`<div class="ft-logger"><span style="font-size:0.5rem;color:var(--neon-cyan);font-family:'Orbitron'">FT RESULT:</span><input class="ft-input" type="number" id="ftH_${r.id}" min="0" max="20" placeholder="H" value="${r.ftHome!=null?r.ftHome:''}"><span style="font-size:0.8rem;color:var(--muted)">-</span><input class="ft-input" type="number" id="ftA_${r.id}" min="0" max="20" placeholder="A" value="${r.ftAway!=null?r.ftAway:''}"><button class="btn-success btn-sm" onclick="saveHistoryFTResult(${r.id})">💾 SAVE FT</button>${r.ftHome!=null?`<button class="btn-primary btn-sm" onclick="saveHistoryFTResult(${r.id})">✏️ UPDATE</button>`:''}</div>`; const noteSection=`<div class="hcard-notes"><textarea class="notes-input" id="notes_${r.id}" rows="1" placeholder="📝 Match notes...">${r.notes||''}</textarea><button class="btn-sm" onclick="saveHistoryNotes(${r.id})" style="margin-top:0.2rem;font-size:0.45rem">💾 Note</button></div>`; return `<div class="history-card ${cardClass}" style="animation-delay:${animIdx*0.05}s" id="hcard_${r.id}"><div class="hcard-header"><div><div class="hcard-league">🏆 ${r.leagueName||'Unknown League'}</div><div class="hcard-datetime">📅 ${r.matchDate} ⏰ ${r.matchTime}</div></div><div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap">${badge}<button class="expand-btn" onclick="toggleHistoryCard(${r.id})">▼ Details</button><button class="btn-danger btn-sm" onclick="confirmDeleteHistory(${r.id})">🗑</button></div></div><div class="hcard-teams"><div class="hcard-team">${homeLogo}<div class="hcard-team-name">${r.homeTeam}</div></div><div class="hcard-score-vs">${ftDisplay}</div><div class="hcard-team">${awayLogo}<div class="hcard-team-name">${r.awayTeam}</div></div></div>${ftLogger}${ahDisplay}${dcDisplay}<div class="hcard-details" id="hcard_details_${r.id}"><div style="margin-top:0.5rem"><div style="font-size:0.5rem;color:var(--neon-cyan);font-family:'Orbitron';margin-bottom:0.3rem">🎯 CORRECT SCORES (TOP 4)</div><div class="cs-grid">${csBoxes}</div><div style="font-size:0.5rem;color:var(--neon-cyan);font-family:'Orbitron';margin:0.5rem 0 0.3rem">💰 PREDICTED MARKETS</div><div class="market-results-grid">${markets}</div><div style="display:flex;gap:0.5rem;font-size:0.5rem;color:var(--muted);margin-top:0.3rem"><span>⚡ xG: ${r.xgHome} - ${r.xgAway}</span></div>${noteSection}</div></div><div class="hcard-meta"><span>💾 Saved: ${r.savedTimestamp}</span><span>ID: #${r.id}</span></div></div>`; }
+    function buildMarketResultBoxes(r){ const pm=r.predictedMarkets||{}; const mr=r.marketResults||{}; const pending=r.status==='pending'; const items=[ {key:'homeWin',label:'🏠 HOME WIN',prob:pm.homeWin}, {key:'draw',label:'🤝 DRAW',prob:pm.draw}, {key:'awayWin',label:'✈️ AWAY WIN',prob:pm.awayWin}, {key:'over25',label:'OVER 2.5',prob:pm.over25}, {key:'under25',label:'UNDER 2.5',prob:pm.under25}, {key:'over15',label:'OVER 1.5',prob:pm.over15}, {key:'bttsY',label:'BTTS YES',prob:pm.bttsY}, {key:'bttsN',label:'BTTS NO',prob:pm.bttsN}, ]; return items.map(it=>{ const st=mr[it.key]; const cls=pending||st===undefined?'mkt-pending':st?'mkt-win':'mkt-loss'; const badge=pending||st===undefined?'<span class="mkt-badge" style="background:#ffe600;color:#000">WAIT</span>':st?'<span class="mkt-badge">WIN</span>':'<span class="mkt-badge">LOSS</span>'; return `<div class="mkt-box ${cls}"><div class="mkt-label">${it.label}</div><div class="mkt-prob">${it.prob||'--'}%</div>${badge}</div>`; }).join(''); }
+    function buildCSBoxes(r){ const ps=r.predictedScores||[]; return ps.slice(0,4).map((s,i)=>{ let cls='', badge=''; if(r.ftHome!=null){ const hit=s.home===r.ftHome&&s.away===r.ftAway; cls=hit?'cs-hit':'cs-miss'; badge=hit?`<div class="cs-result-badge" style="background:var(--win-color);color:#000">HIT!</div>`:`<div class="cs-result-badge" style="background:var(--loss-color)">MISS</div>`; } return `<div class="cs-box ${cls}"><div class="cs-score">${s.home}-${s.away}</div><div class="cs-pct">${s.prob}%</div>${badge}</div>`; }).join(''); }
+    window.toggleHistoryCard=function(id){ const d=document.getElementById(`hcard_details_${id}`); if(d)d.classList.toggle('expanded'); };
+    window.saveHistoryFTResult=async function(id){ const hInput=document.getElementById(`ftH_${id}`); const aInput=document.getElementById(`ftA_${id}`); if(!hInput||!aInput)return; const ftH=parseInt(hInput.value); const ftA=parseInt(aInput.value); if(isNaN(ftH)||isNaN(ftA)){showToast('❌ Enter valid scores','error');return;} const all=await dbGetAll(); const record=all.find(r=>r.id===id); if(!record)return; record.ftHome=ftH; record.ftAway=ftA; const pm=record.predictedMarkets||{}; const tg=ftH+ftA; const btts=ftH>0&&ftA>0; record.marketResults={ homeWin:ftH>ftA,draw:ftH===ftA,awayWin:ftH<ftA, over25:tg>2.5, under25:tg<=2.5, over15:tg>1.5, under15:tg<=1.5, bttsY:btts, bttsN:!btts }; if(record.predictedAsianHandicap){ const line = parseFloat(record.predictedAsianHandicap.line); record.asianHandicapResult = evaluateAsianHandicapResult(ftH, ftA, line); } if(record.predictedDoubleChance){ record.doubleChanceResults = { homeOrDraw: evaluateDoubleChanceResult(ftH, ftA, 'home_or_draw'), awayOrDraw: evaluateDoubleChanceResult(ftH, ftA, 'away_or_draw'), homeOrAway: evaluateDoubleChanceResult(ftH, ftA, 'home_or_away') }; } const highestProbMkt=Object.entries(pm).sort((a,b)=>parseFloat(b[1])-parseFloat(a[1]))[0]; const highestKey=highestProbMkt?.[0]; record.status=highestKey&&record.marketResults[highestKey]?'win':'loss'; if(record.asianHandicapResult === 'push' && record.status === 'loss') record.status = 'half-win'; const ps=record.predictedScores||[]; record.correctScoreHit=ps.some(s=>s.home===ftH&&s.away===ftA); record.lastUpdated=new Date().toLocaleString(); await dbUpdate(record); showToast(`✅ FT ${ftH}-${ftA} saved & validated!`,'success'); renderHistoryCards(); refreshAnalytics(); };
+    window.saveHistoryNotes=async function(id){ const ni=document.getElementById(`notes_${id}`); if(!ni)return; const all=await dbGetAll(); const rec=all.find(r=>r.id===id); if(!rec)return; rec.notes=ni.value; await dbUpdate(rec); showToast('📝 Notes saved','success'); };
+    window.confirmDeleteHistory=function(id){ showConfirmModal('🗑️ Delete Match','This will permanently delete this history record.',async()=>{ await dbDelete(id); showToast('🗑️ Deleted','success'); renderHistoryCards(); refreshAnalytics(); }); };
+    function confirmClearHistory(){ showConfirmModal('⚠️ Clear ALL History','This will permanently delete ALL prediction history. This cannot be undone!',async()=>{ await dbClearAll(); showToast('🗑️ All history cleared','success'); renderHistoryCards(); refreshAnalytics(); }); }
+    
+    async function exportHistory(){ const all=await dbGetAll(); const json=JSON.stringify(all,null,2); const blob=new Blob([json],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`predictor_history_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url); showToast(`⬇️ Exported ${all.length} records`,'success'); }
+    async function backupHistory(){ const all=await dbGetAll(); const json=JSON.stringify({backup:true,date:new Date().toISOString(),data:all}); const blob=new Blob([json],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`predictor_backup_${Date.now()}.json`; a.click(); URL.revokeObjectURL(url); showToast(`💾 Backup created`,'success'); }
+    async function importHistory(event){ const file=event.target.files[0]; if(!file)return; const text=await file.text(); try{ let arr=JSON.parse(text); if(arr.backup&&arr.data)arr=arr.data; if(!Array.isArray(arr)){showToast('❌ Invalid format','error');return;} let added=0; for(const rec of arr){ const {id,...rest}=rec; await dbAdd(rest); added++; } showToast(`⬆️ Imported ${added} records`,'success'); renderHistoryCards(); refreshAnalytics(); }catch(e){showToast('❌ Import failed','error');} event.target.value=''; }
+    
+    async function refreshAnalytics(){ const all=await dbGetAll(); const completed=all.filter(r=>r.ftHome!=null); const wins=completed.filter(r=>r.status==='win'); const losses=completed.filter(r=>r.status==='loss'); const halfWins=completed.filter(r=>r.status==='half-win'); const csHits=completed.filter(r=>r.correctScoreHit===true); const ahWins=completed.filter(r=>r.asianHandicapResult === 'home_win' || r.asianHandicapResult === 'away_win'); const dcWins=completed.filter(r=>r.doubleChanceResults && (r.doubleChanceResults.homeOrDraw === true || r.doubleChanceResults.awayOrDraw === true)); const total=all.length; const winRate=completed.length?Math.round(wins.length/completed.length*100):0; const csRate=completed.length?Math.round(csHits.length/completed.length*100):0; const ahRate=completed.length?Math.round(ahWins.length/completed.length*100):0; const dcRate=completed.length?Math.round(dcWins.length/completed.length*100):0; const og=$('analyticsOverviewGrid'); if(og)og.innerHTML=[ {icon:'📊',val:total,label:'Total Predictions',cls:''}, {icon:'✅',val:wins.length,label:'Total Wins',cls:'win-val'}, {icon:'🟠',val:halfWins.length,label:'Half Wins',cls:'half-val'}, {icon:'❌',val:losses.length,label:'Total Losses',cls:'loss-val'}, {icon:'📈',val:winRate+'%',label:'Win Rate',cls:'win-val'}, {icon:'🌏',val:ahRate+'%',label:'AH Accuracy',cls:'half-val'}, {icon:'🎲',val:dcRate+'%',label:'DC Accuracy',cls:'win-val'}, {icon:'🎯',val:csRate+'%',label:'CS Accuracy',cls:''}, {icon:'⏳',val:all.filter(r=>r.status==='pending').length,label:'Pending',cls:''}, {icon:'🏆',val:completed.length,label:'Logged Results',cls:''}, ].map(c=>`<div class="analytics-card"><div class="ac-icon">${c.icon}</div><div class="ac-value ${c.cls}">${c.val}</div><div class="ac-label">${c.label}</div></div>`).join(''); const pcr=$('progressCirclesRow'); if(pcr)pcr.innerHTML=[ {label:'Win Rate',pct:winRate,color:'#00cfff'}, {label:'AH Accuracy',pct:ahRate,color:'#ff8800'}, {label:'DC Accuracy',pct:dcRate,color:'#ffe600'}, {label:'CS Accuracy',pct:csRate,color:'#ff00c8'}, ].map(pc=>{ const r=28;const c=2*Math.PI*r;const off=c-(pc.pct/100)*c; return `<div class="progress-circle-wrap"><div class="progress-circle"><svg viewBox="0 0 70 70"><circle class="track" cx="35" cy="35" r="${r}"/><circle class="fill" cx="35" cy="35" r="${r}" stroke="${pc.color}" stroke-dasharray="${c}" stroke-dashoffset="${off}"/></svg><div class="progress-circle-text" style="color:${pc.color}">${pc.pct}%</div></div><div style="font-size:0.45rem;color:var(--muted);text-align:center">${pc.label}</div></div>`; }).join(''); buildStreakSection(all,wins,losses,halfWins); buildWinLossChart(all); buildMarketAccuracyChart(completed); buildMarketAccTable(completed); }
+    function buildStreakSection(all,wins,losses,halfWins){ const completed=all.filter(r=>r.ftHome!=null).sort((a,b)=>a.timestamp-b.timestamp); let curWinStreak=0,curLossStreak=0,curHalfStreak=0,maxWin=0,maxLoss=0,maxHalf=0,tmpW=0,tmpL=0,tmpH=0; for(const r of completed){ if(r.status==='win'){tmpW++;tmpL=0;tmpH=0;if(tmpW>maxWin)maxWin=tmpW;} else if(r.status==='half-win'){tmpH++;tmpW=0;tmpL=0;if(tmpH>maxHalf)maxHalf=tmpH;} else{tmpL++;tmpW=0;tmpH=0;if(tmpL>maxLoss)maxLoss=tmpL;} } for(let i=completed.length-1;i>=0;i--){ if(completed[i].status==='win')curWinStreak++;else break; } for(let i=completed.length-1;i>=0;i--){ if(completed[i].status==='loss')curLossStreak++;else break; } for(let i=completed.length-1;i>=0;i--){ if(completed[i].status==='half-win')curHalfStreak++;else break; } const sg=$('streakGrid'); if(sg)sg.innerHTML=[ {label:'Current Win Streak',val:curWinStreak,cls:'win-streak'}, {label:'Current Half-Win Streak',val:curHalfStreak,cls:'half-streak'}, {label:'Current Loss Streak',val:curLossStreak,cls:'loss-streak'}, {label:'Longest Win Streak',val:maxWin,cls:'win-streak'}, {label:'Longest Half Streak',val:maxHalf,cls:'half-streak'}, {label:'Longest Loss Streak',val:maxLoss,cls:'loss-streak'}, {label:'All Time Wins',val:wins.length,cls:'win-streak'}, {label:'Half Wins',val:halfWins.length,cls:'half-streak'}, {label:'All Time Losses',val:losses.length,cls:'loss-streak'}, ].map(s=>`<div class="streak-card ${s.cls}"><div class="streak-val">${s.val}</div><div class="streak-label">${s.label}</div></div>`).join(''); }
+    function buildWinLossChart(records){ const canvas=$('winLossChart'); if(!canvas)return; if(winLossChartInst)winLossChartInst.destroy(); const completed=records.filter(r=>r.ftHome!=null); const weeks={}; completed.forEach(r=>{ const d=new Date(r.timestamp); const wk=`W${getWeekNum(d)}`; if(!weeks[wk])weeks[wk]={wins:0,losses:0,halves:0}; if(r.status==='win')weeks[wk].wins++; else if(r.status==='half-win')weeks[wk].halves++; else weeks[wk].losses++; }); const labels=Object.keys(weeks).slice(-8); winLossChartInst=new Chart(canvas,{ type:'bar', data:{labels,datasets:[ {label:'Wins',data:labels.map(l=>weeks[l]?.wins||0),backgroundColor:'rgba(0,207,255,0.5)',borderColor:'#00cfff',borderWidth:1}, {label:'Half Wins',data:labels.map(l=>weeks[l]?.halves||0),backgroundColor:'rgba(255,136,0,0.5)',borderColor:'#ff8800',borderWidth:1}, {label:'Losses',data:labels.map(l=>weeks[l]?.losses||0),backgroundColor:'rgba(255,34,68,0.4)',borderColor:'#ff2244',borderWidth:1} ]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:10}}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:9}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#94a3b8',font:{size:9}},grid:{color:'rgba(255,255,255,0.05)'}}}} }); }
+    function buildMarketAccuracyChart(completed){ const canvas=$('marketAccChart'); if(!canvas)return; if(marketAccChartInst)marketAccChartInst.destroy(); const mkeys=['homeWin','draw','awayWin','over25','under25','bttsY','bttsN']; const mlabels=['Home Win','Draw','Away Win','Over 2.5','Under 2.5','BTTS Y','BTTS N']; const accs=mkeys.map(k=>{ const relevant=completed.filter(r=>r.marketResults&&r.marketResults[k]!==undefined); if(!relevant.length)return 0; return Math.round(relevant.filter(r=>r.marketResults[k]).length/relevant.length*100); }); marketAccChartInst=new Chart(canvas,{ type:'bar', data:{labels:mlabels,datasets:[{label:'Market Accuracy %',data:accs,backgroundColor:accs.map(a=>a>=60?'rgba(0,207,255,0.5)':'rgba(255,34,68,0.4)'),borderColor:accs.map(a=>a>=60?'#00cfff':'#ff2244'),borderWidth:1}]}, options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{max:100,ticks:{color:'#94a3b8',font:{size:9}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#94a3b8',font:{size:9}},grid:{color:'rgba(255,255,255,0.05)'}}}} }); }
+    function buildMarketAccTable(completed){ const el=$('marketAccTable');if(!el)return; const mkeys=['homeWin','draw','awayWin','over25','under25','over15','under15','bttsY','bttsN']; const mlabels={homeWin:'🏠 Home Win',draw:'🤝 Draw',awayWin:'✈️ Away Win',over25:'Over 2.5',under25:'Under 2.5',over15:'Over 1.5',under15:'Under 1.5',bttsY:'BTTS Yes',bttsN:'BTTS No'}; if(!completed.length){el.innerHTML='<p style="color:var(--muted);text-align:center">Log FT results to see market accuracy</p>';return;} let html=`<table style="width:100%;border-collapse:collapse"><tr style="font-size:0.45rem;color:var(--neon-cyan);font-family:'Orbitron'"><th style="text-align:left;padding:0.2rem">Market</th><th>Predictions</th><th>Wins</th><th>Accuracy</th></tr>`; mkeys.forEach(k=>{ const relevant=completed.filter(r=>r.marketResults&&r.marketResults[k]!==undefined); const w=relevant.filter(r=>r.marketResults[k]).length; const acc=relevant.length?Math.round(w/relevant.length*100):0; const color=acc>=60?'var(--win-color)':acc>=40?'var(--neon-yellow)':'var(--loss-color)'; html+=`<tr style="border-bottom:1px solid rgba(255,255,255,0.05)"><td style="padding:0.2rem;font-size:0.6rem">${mlabels[k]}</td><td style="text-align:center;font-size:0.6rem">${relevant.length}</td><td style="text-align:center;font-size:0.6rem">${w}</td><td style="text-align:center;font-family:'Orbitron';font-size:0.65rem;color:${color}">${acc}%</td></tr>`; }); html+='</table>'; el.innerHTML=html; }
+    function getWeekNum(d){ const onejan=new Date(d.getFullYear(),0,1); return Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7); }
+    
+    window.fetchManualStandings=fetchManualStandings; window.fetchRecentMatches=fetchRecentMatches; window.parseManualTable=parseManualTable; window.saveManualLeague=saveManualLeague; window.loadSavedLeague=loadSavedLeague; window.deleteAllLeagues=deleteAllLeagues; window.autoCalibrate=autoCalibrate; window.calculateAll=calculateAll; window.logManualResult=logManualResult; window.logAutoResult=logAutoResult; window.selfLearn=selfLearn; window.trainAndPredictTF=trainAndPredictTF; window.predictAutoFixture=predictAutoFixture; window.fetchAutoLeagueData=fetchAutoLeagueData; window.autoPredictAll=autoPredictAll; window.saveCurrentToHistory=saveCurrentToHistory; window.confirmClearHistory=confirmClearHistory; window.exportHistory=exportHistory; window.backupHistory=backupHistory; window.importHistory=importHistory;
+    
+    function setAsianLine(line){ currentAsianLine = line; document.querySelectorAll('.asian-line-btn').forEach(btn => { if(parseFloat(btn.dataset.line) === line) btn.classList.add('active'); else btn.classList.remove('active'); }); if(selHome && selAway) calculateAll(); showToast(`🌏 Asian Handicap line set to ${line}`, 'success'); }
+    const asianLineHtml = `<div class="asian-line-selector"><span style="font-size:0.45rem;color:var(--neon-cyan);">🌏 AH LINE:</span><button class="asian-line-btn active" data-line="0" onclick="setAsianLine(0)">0 (PK)</button><button class="asian-line-btn" data-line="0.25" onclick="setAsianLine(0.25)">0.25</button><button class="asian-line-btn" data-line="0.5" onclick="setAsianLine(0.5)">0.5</button><button class="asian-line-btn" data-line="0.75" onclick="setAsianLine(0.75)">0.75</button><button class="asian-line-btn" data-line="1" onclick="setAsianLine(1)">1</button><button class="asian-line-btn" data-line="1.25" onclick="setAsianLine(1.25)">1.25</button><button class="asian-line-btn" data-line="1.5" onclick="setAsianLine(1.5)">1.5</button></div>`;
+    setTimeout(() => { const manualSection = document.querySelector('#manualPage .teams-grid'); if(manualSection && !document.querySelector('.asian-line-selector')) { manualSection.insertAdjacentHTML('afterend', asianLineHtml); } }, 100);
+    
+    initUsers(); initHistoryStorage(); let sessionUser=JSON.parse(sessionStorage.getItem(SSK)); if(sessionUser){curUser=sessionUser;loadData();showApp();} else{$('authWrapper').classList.remove('hidden');$('predictorApp').classList.add('hidden');}
+  </script>
+</body>
+</html>
