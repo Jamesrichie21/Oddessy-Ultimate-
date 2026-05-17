@@ -1,0 +1,17 @@
+{
+  "name": "football-predictor",
+  "version": "1.0.0",
+  "description": "Ultimate Math Predictor for Football Matches - AI Powered Predictions",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo \"Build completed\"",
+    "start": "vercel dev"
+  },
+  "keywords": ["football", "prediction", "poisson", "monte-carlo", "neural-network", "asian-handicap", "double-chance"],
+  "author": "James",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  }
+}
